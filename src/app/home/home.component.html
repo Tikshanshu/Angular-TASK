@@ -1,0 +1,36 @@
+<div class="header">
+  <app-nav-bar [title]="compname"></app-nav-bar>
+</div>
+
+<div class="layout">
+  <div class="sidebar" [class.collapsed]="isCollapsed">
+    <button class="sidebar-toggle" type="button" (click)="toggleSidebar()" aria-label="Toggle Sidebar">
+      <p class="menu-text" *ngIf="isCollapsed">MENU</p>
+      <p *ngIf="!isCollapsed" class="icon">&#9776;</p>
+    </button>
+    
+    <nav class="navigation">
+      <ul class="menu">
+        <li class="menu-item" *ngIf="!isCollapsed">
+          <a routerLink="stop" routerLinkActive="active" class="menu-link" (click)="setCompName('Stop')">Stop</a>
+        </li>
+        <li class="menu-item" *ngIf="!isCollapsed">
+          <a routerLink="stopspoint" routerLinkActive="active" class="menu-link" (click)="setCompName('StopsPoint')">StopsPoint</a>
+        </li>
+        <li class="menu-item" *ngIf="!isCollapsed">
+          <a routerLink="camera" routerLinkActive="active" class="menu-link" (click)="setCompName('Camera')">Camera</a>
+        </li>
+        <li class="menu-item" *ngIf="!isCollapsed">
+          <a routerLink="route" routerLinkActive="active" class="menu-link" (click)="setCompName('Routes')">Routes</a>
+        </li>
+        <li class="menu-item" *ngIf="!isCollapsed">
+          <a routerLink="pattern" routerLinkActive="active" class="menu-link" (click)="setCompName('Pattern')">Pattern</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+</div>

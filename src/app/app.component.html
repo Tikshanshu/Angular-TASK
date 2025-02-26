@@ -1,0 +1,7 @@
+
+<div *ngIf="!isLoggedIn">
+  <app-login (loginStatusChanged)="onLoginStatusChange($event)"></app-login> 
+</div>
+<div *ngIf="isLoggedIn">
+  <router-outlet></router-outlet>
+</div>

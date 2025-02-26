@@ -1,0 +1,40 @@
+<kendo-chart style="width: 900px; height:600px" [title]="{ text: 'Charge current vs. charge time' }">
+    <!-- Data Series -->
+    <kendo-chart-series>
+      <kendo-chart-series-item
+        *ngFor="let series of chargeData"
+        type="scatterLine"
+        name="{{ series.current }}C"
+        [data]="series.stats"
+        xField="time"
+        yField="charge"
+      >
+      </kendo-chart-series-item>
+    </kendo-chart-series>
+  
+    <!-- X-Axis -->
+    <kendo-chart-x-axis>
+      <kendo-chart-x-axis-item [title]="{ text: 'Time (minutes)' }" [labels]="{ format: '{0}m' }" [max]="100">
+        <kendo-chart-x-axis-item-crosshair>
+          <kendo-chart-x-axis-item-crosshair-tooltip format="{0}m"></kendo-chart-x-axis-item-crosshair-tooltip>
+        </kendo-chart-x-axis-item-crosshair>
+      </kendo-chart-x-axis-item>
+    </kendo-chart-x-axis>
+  
+    <!-- Y-Axis -->
+    <kendo-chart-y-axis>
+      <kendo-chart-y-axis-item [title]="{ text: 'Charge (%)' }" [labels]="{ format: '{0}%' }" [max]="100">
+        <kendo-chart-y-axis-item-crosshair>
+          <kendo-chart-y-axis-item-crosshair-tooltip format="{0}%"></kendo-chart-y-axis-item-crosshair-tooltip>
+        </kendo-chart-y-axis-item-crosshair>
+      </kendo-chart-y-axis-item>
+    </kendo-chart-y-axis>
+  
+    <!-- Tooltip -->
+    <kendo-chart-tooltip format="{1}% charge at {0} minutes"> </kendo-chart-tooltip>
+  </kendo-chart>
+  
+
+
+
+  

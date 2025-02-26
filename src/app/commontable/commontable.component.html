@@ -1,0 +1,60 @@
+<div class="table-container">
+  
+  <kendo-grid 
+    class="custom-grid"
+    [data]="gridView" 
+    style="height:100%;"
+    [pageable]="true" 
+    [pageSize]="pageSize" 
+    [skip]="skip" 
+    [sortable]="true" 
+    [scrollable]="'virtual'"
+    [rowHeight]="36"
+    [detailRowHeight]="70"
+    [resizable]="true" 
+    [filterable]="true"
+    
+    (filterChange)="filterChange($event)"
+    (pageChange)="pageChange($event)">
+    
+    
+    <kendo-grid-column *ngFor="let title of titles" 
+                       [width]="130" 
+                       [field]="title"
+                       [autoSize]="true"
+                       [title]="formatColumnTitle(title)" 
+                       [filterable]="true"
+                       
+                       [filter]="getColumnFilter(title)"
+                       [filterStyle]="{ 'background-color': '#73A6E2' }"
+                       filterClass="filterCustomClass">
+                       
+    </kendo-grid-column>
+
+    
+    <ng-template kendoGridDetailTemplate let-dataItem>
+      <section *ngIf="dataItem.links?.length">
+        <kendo-grid 
+          [data]="dataItem.links" 
+          [resizable]="true" 
+          [sortable]="true"
+          >
+          
+          <kendo-grid-column field="direction" title="Direction" [width]="120"></kendo-grid-column>
+          <kendo-grid-column field="isBasicPath" title="Basic Path" [width]="120"></kendo-grid-column>
+
+          <kendo-grid-column title="Points" [width]="250">
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <div *ngFor="let point of dataItem.points">
+                Lat: {{point.lat}}, Lon: {{point.lon}}
+              </div>
+            </ng-template>
+          </kendo-grid-column>
+
+        </kendo-grid>
+      </section>
+    </ng-template>
+    
+  </kendo-grid>
+
+</div>
