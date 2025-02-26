@@ -22,7 +22,6 @@ export class StopsComponent implements OnInit{
   ngOnInit(){
     this.http.get<any[]>(this.url).subscribe(data => {
       this.stopData=data;
-      console.log(this.stopData[0]);
       });
   }
 

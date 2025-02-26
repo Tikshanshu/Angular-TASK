@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';  
+import { DataStateChangeEvent, GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';  
 import { GridModule } from '@progress/kendo-angular-grid';  
 import { CompositeFilterDescriptor, filterBy, process, State, FilterDescriptor } from '@progress/kendo-data-query';
 import { FormsModule } from '@angular/forms';
@@ -13,13 +13,13 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./commontable.component.scss']
 })
 export class CommontableComponent implements OnInit, OnChanges {
+  
   titles: string[] = [];
-  public gridView: GridDataResult = { data: [], total: 0 };
+  @Input() dataArray: any[] = [];
   public pageSize = 29;
   public skip = 0;
-  @Input() dataArray: any[] = [];
-  
- 
+
+
   public state: State = {
     skip: this.skip,
     take: this.pageSize,
@@ -29,6 +29,12 @@ export class CommontableComponent implements OnInit, OnChanges {
       filters: []
     }
   };
+  public gridView: GridDataResult = process(this.dataArray, this.state);
+ 
+ 
+  
+ 
+  
 
   ngOnInit(): void {}
 
@@ -50,13 +56,10 @@ export class CommontableComponent implements OnInit, OnChanges {
   }
 
   
-  filterChange(filter: CompositeFilterDescriptor): void {
-    this.state.filter = {
-      logic: 'and',
-      filters: [...this.state.filter.filters, ...filter.filters]
-    };
-    this.loadItems();
-}
+ public dataStateChange(state: DataStateChangeEvent): void {
+    this.state = state;
+    this.gridView = process(this.dataArray, this.state);
+  }
 
   
   

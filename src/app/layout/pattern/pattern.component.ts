@@ -20,7 +20,7 @@ export class PatternComponent {
     ngOnInit(){
       this.http.get<any[]>(this.url).subscribe(data => {
         this.patternData=data;
-        console.log(this.patternData[0]);
+        
         });
     }
 

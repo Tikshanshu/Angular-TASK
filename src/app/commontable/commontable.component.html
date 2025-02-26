@@ -13,10 +13,13 @@
     [detailRowHeight]="70"
     [resizable]="true" 
     [filterable]="true"
+    (pageChange)="pageChange($event)"
+    (dataStateChange)="dataStateChange($event)">
     
-    (filterChange)="filterChange($event)"
-    (pageChange)="pageChange($event)">
-    
+    <ng-template kendoGridToolbarTemplate>
+      <button kendoButton>Save</button>
+      <button kendoButton>Cancel</button>
+      </ng-template>
     
     <kendo-grid-column *ngFor="let title of titles" 
                        [width]="130" 
