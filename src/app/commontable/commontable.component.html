@@ -1,8 +1,10 @@
 <div class="table-container">
   
   <kendo-grid 
+  #grid
     class="custom-grid"
-    [data]="gridView" 
+
+    [data]="gridView|async" 
     style="height:100%;"
     [pageable]="true" 
     [pageSize]="pageSize" 
@@ -13,12 +15,34 @@
     [detailRowHeight]="70"
     [resizable]="true" 
     [filterable]="true"
+    [filter]="state.filter"
     (pageChange)="pageChange($event)"
-    (dataStateChange)="dataStateChange($event)">
+    (dataStateChange)="dataStateChange($event)"
+    (cellClick)="cellClickHandler($event)"
+      (dblclick)="onDblClick()"
+      (cellClose)="cellCloseHandler($event)"
+      (cancel)="cancelHandler($event)"
+      (save)="saveHandler($event)"
+      (remove)="removeHandler($event)"
+      (add)="addHandler($event)"
+      [navigable]="true">
     
     <ng-template kendoGridToolbarTemplate>
-      <button kendoButton>Save</button>
-      <button kendoButton>Cancel</button>
+      <button kendoGridAddCommand>Add new</button>
+        <button
+          kendoButton
+          [disabled]="!editService.hasChanges()"
+          (click)="saveChanges(grid)"
+        >
+          Save Changes
+        </button>
+        <button
+          kendoButton
+          [disabled]="!editService.hasChanges()"
+          (click)="cancelChanges(grid)"
+        >
+          Cancel Changes
+        </button>
       </ng-template>
     
     <kendo-grid-column *ngFor="let title of titles" 
@@ -27,12 +51,20 @@
                        [autoSize]="true"
                        [title]="formatColumnTitle(title)" 
                        [filterable]="true"
-                       
+                       [editable]="true" 
                        [filter]="getColumnFilter(title)"
                        [filterStyle]="{ 'background-color': '#73A6E2' }"
                        filterClass="filterCustomClass">
                        
     </kendo-grid-column>
+
+    <kendo-grid-command-column title="command" [width]="220">
+      <ng-template kendoGridCellTemplate let-isNew="isNew">
+        <button kendoGridRemoveCommand>Remove</button>
+        <button kendoGridSaveCommand>Add</button>
+        <button kendoGridCancelCommand>Cancel</button>
+      </ng-template>
+    </kendo-grid-command-column>
 
     
     <ng-template kendoGridDetailTemplate let-dataItem>

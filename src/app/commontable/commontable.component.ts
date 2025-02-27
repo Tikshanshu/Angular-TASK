@@ -5,12 +5,33 @@ import { GridModule } from '@progress/kendo-angular-grid';
 import { CompositeFilterDescriptor, filterBy, process, State, FilterDescriptor } from '@progress/kendo-data-query';
 import { FormsModule } from '@angular/forms';
 
+import { ButtonsModule } from "@progress/kendo-angular-buttons";
+import { DropDownsModule } from "@progress/kendo-angular-dropdowns";
+import { DialogModule } from "@progress/kendo-angular-dialog";
+import { EditService } from '../services/edit.service';
+import { Observable } from "rxjs";
+import { Validators, FormBuilder, FormGroup } from "@angular/forms";
+import {
+  AddEvent,
+  CellClickEvent,
+  CellCloseEvent,
+  SaveEvent,
+  CancelEvent,
+  GridComponent,
+  RemoveEvent,
+} from "@progress/kendo-angular-grid";
+import { Keys } from "@progress/kendo-angular-common";
+import { Stop } from "../Models/stop.model";
+import { map } from "rxjs/operators";
+
+
 @Component({
   selector: 'app-commontable',
   standalone: true,
-  imports: [CommonModule, GridModule,FormsModule],
+  imports: [CommonModule, GridModule,FormsModule, ButtonsModule, DropDownsModule, DialogModule],
   templateUrl: './commontable.component.html',
-  styleUrls: ['./commontable.component.scss']
+  styleUrls: ['./commontable.component.scss'],
+  providers: [EditService]
 })
 export class CommontableComponent implements OnInit, OnChanges {
   
@@ -19,7 +40,7 @@ export class CommontableComponent implements OnInit, OnChanges {
   public pageSize = 29;
   public skip = 0;
 
-
+  
   public state: State = {
     skip: this.skip,
     take: this.pageSize,
@@ -29,14 +50,23 @@ export class CommontableComponent implements OnInit, OnChanges {
       filters: []
     }
   };
-  public gridView: GridDataResult = process(this.dataArray, this.state);
+  public gridView:  Observable<GridDataResult>;
  
- 
-  
- 
-  
+ public changes = {};
+ public cellArgs: CellClickEvent;
 
-  ngOnInit(): void {}
+ constructor(
+   private formBuilder: FormBuilder,
+   public editService: EditService
+ ) {}
+ 
+  ngOnInit(): void {
+    this.updateTitles();
+    this.gridView = this.editService.pipe(
+      map((data) => process(data, this.state))
+    );
+    this.editService.read();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['dataArray']) {
@@ -58,10 +88,9 @@ export class CommontableComponent implements OnInit, OnChanges {
   
  public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
-    this.gridView = process(this.dataArray, this.state);
+    this.loadItems();
   }
 
-  
   
   getColumnFilter(field: string): 'text' | 'numeric' | 'date' | 'boolean' {
     switch (field) {
@@ -102,14 +131,99 @@ export class CommontableComponent implements OnInit, OnChanges {
   }
 
   private loadItems(): void {
-    const filteredData = process(this.dataArray, { filter: this.state.filter }).data;
-  
-    this.gridView = {
-      data: filteredData.slice(this.state.skip, this.state.skip + this.pageSize),
-      total: filteredData.length
-    };
+    this.gridView = this.editService.pipe(
+      map((data) => process(data, this.state))
+    );
   }
   
+  public onDblClick(): void {
+    if (!this.cellArgs.isEdited) {
+      this.cellArgs.sender.editCell(
+        this.cellArgs.rowIndex,
+        this.cellArgs.columnIndex,
+        this.createFormGroup(this.cellArgs.dataItem)
+      );
+    }
+  }
 
+  public cellClickHandler(args: CellClickEvent): void {
+    this.cellArgs = args;
+  }
+
+  public cellCloseHandler(args: CellCloseEvent): void {
+    const { formGroup, dataItem } = args;
+
+    if (!formGroup.valid) {
+      args.preventDefault();
+    } else if (formGroup.dirty) {
+      if (args.originalEvent && args.originalEvent.keyCode === Keys.Escape) {
+        return;
+      }
+
+      this.editService.assignValues(dataItem, formGroup.value);
+      this.editService.update(dataItem);
+    }
+  }
+
+  public addHandler(args: AddEvent): void {
+    args.sender.addRow(this.createFormGroup(new Stop()));
+  }
+
+  public cancelHandler(args: CancelEvent): void {
+    args.sender.closeRow(args.rowIndex);
+  }
+
+  public saveHandler(args: SaveEvent): void {
+    if (args.formGroup.valid) {
+      this.editService.create(args.formGroup.value);
+      args.sender.closeRow(args.rowIndex);
+    }
+  }
+
+  public removeHandler(args: RemoveEvent): void {
+    this.editService.remove(args.dataItem);
+    args.sender.cancelCell();
+  }
+
+  public saveChanges(grid: GridComponent): void {
+    grid.closeCell();
+    grid.cancelCell();
+    this.editService.saveChanges();
+  }
+
+  public cancelChanges(grid: GridComponent): void {
+    grid.cancelCell();
+    this.editService.cancelChanges();
+  }
+
+  public createFormGroup(dataItem: Stop): FormGroup {
+    return this.formBuilder.group({
+      primarykeyduid: dataItem.primarykeyduid,
+      stopnumber: [dataItem.stopnumber, Validators.required],
+      shortcode: [dataItem.shortcode, Validators.required],
+      langbezeichner: [dataItem.langbezeichner, Validators.required],
+      externalid: dataItem.externalid,
+      haltestellenlangnummer: [dataItem.haltestellenlangnummer, Validators.required],
+      zonewabeindex: [dataItem.zonewabeindex, Validators.required],
+      ibisbezeichner: [dataItem.ibisbezeichner, Validators.required],
+      tlpmode: [dataItem.tlpmode, Validators.required],
+      fahrzeugansagetextindex: [dataItem.fahrzeugansagetextindex, Validators.required],
+      parenttableindex: dataItem.parenttableindex,
+      tarifortsname: dataItem.tarifortsname,
+      haltestellensymbolindex: dataItem.haltestellensymbolindex,
+      mfaanschlussbildschirm: dataItem.mfaanschlussbildschirm,
+      vorschauzeit: dataItem.vorschauzeit,
+      importstatus: [dataItem.importstatus, Validators.required],
+      commentary: dataItem.commentary,
+      nationalstopnumber: dataItem.nationalstopnumber,
+      stopiconforcc: dataItem.stopiconforcc,
+      assetpictureindex: dataItem.assetpictureindex,
+      effectonccdelta: dataItem.effectonccdelta,
+      isdepot: [dataItem.isdepot, Validators.required],
+      longitude: [dataItem.longitude, Validators.required],
+      latitude: [dataItem.latitude, Validators.required],
+      haltestellenindex: [dataItem.haltestellenindex, Validators.required],
+    });
+  }
   
 }
