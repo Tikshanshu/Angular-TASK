@@ -45,4 +45,14 @@ export class CameraComponent {
       ],
     },
   ];
+  public labelTemplate = (value: number) => {
+    const labelMap = {
+      20: "A",
+      40: "B",
+      60: "C",
+      80: "D",
+      100: "E",
+    };
+    return labelMap[value] || "";
+  };
 }

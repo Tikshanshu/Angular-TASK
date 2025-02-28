@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataStateChangeEvent, GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';  
+import { CellSelectionItem, DataStateChangeEvent, GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';  
 import { GridModule } from '@progress/kendo-angular-grid';  
 import { CompositeFilterDescriptor, filterBy, process, State, FilterDescriptor } from '@progress/kendo-data-query';
 import { FormsModule } from '@angular/forms';
@@ -37,9 +37,8 @@ export class CommontableComponent implements OnInit, OnChanges {
   
   titles: string[] = [];
   @Input() dataArray: any[] = [];
-  public pageSize = 29;
+  public pageSize = 129;
   public skip = 0;
-
   
   public state: State = {
     skip: this.skip,
@@ -89,6 +88,10 @@ export class CommontableComponent implements OnInit, OnChanges {
  public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
     this.loadItems();
+  }
+
+  getEditable(t:string): boolean {
+    return t !== 'primarykeyduid';
   }
 
   
@@ -153,9 +156,7 @@ export class CommontableComponent implements OnInit, OnChanges {
   public cellCloseHandler(args: CellCloseEvent): void {
     const { formGroup, dataItem } = args;
 
-    if (!formGroup.valid) {
-      args.preventDefault();
-    } else if (formGroup.dirty) {
+    if (formGroup.dirty) {
       if (args.originalEvent && args.originalEvent.keyCode === Keys.Escape) {
         return;
       }
@@ -163,6 +164,7 @@ export class CommontableComponent implements OnInit, OnChanges {
       this.editService.assignValues(dataItem, formGroup.value);
       this.editService.update(dataItem);
     }
+    console.log(args);
   }
 
   public addHandler(args: AddEvent): void {

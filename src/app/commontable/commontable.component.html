@@ -8,6 +8,8 @@
     style="height:100%;"
     [pageable]="true" 
     [pageSize]="pageSize" 
+    kendoGridSelectBy="primarykeyduid"
+    
     [skip]="skip" 
     [sortable]="true" 
     [scrollable]="'virtual'"
@@ -25,7 +27,7 @@
       (save)="saveHandler($event)"
       (remove)="removeHandler($event)"
       (add)="addHandler($event)"
-      [navigable]="true">
+      >
     
     <ng-template kendoGridToolbarTemplate>
       <button kendoGridAddCommand>Add new</button>
@@ -51,7 +53,7 @@
                        [autoSize]="true"
                        [title]="formatColumnTitle(title)" 
                        [filterable]="true"
-                       [editable]="true" 
+                       [editable]="getEditable(title)" 
                        [filter]="getColumnFilter(title)"
                        [filterStyle]="{ 'background-color': '#73A6E2' }"
                        filterClass="filterCustomClass">
