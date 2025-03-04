@@ -1,40 +1,75 @@
-<kendo-chart style="width: 900px; height:600px" [title]="{ text: 'Charge current vs. charge time' }">
-    <!-- Data Series -->
-    <kendo-chart-series>
-      <kendo-chart-series-item
-        *ngFor="let series of chargeData"
-        type="scatterLine"
-        name="{{ series.current }}C"
-        [data]="series.stats"
-        xField="time"
-        yField="charge"
+<kendo-chart style="width: 1000px; height:500px" [title]="{ text: 'Charge current vs. charge time' }"
+[zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
+[pannable]="{ lock: 'y' }"
+
+>
+  <!-- Data Series -->
+  <kendo-chart-series>
+    <kendo-chart-series-item
+      
+      type="scatterLine"
+      name="{{ chargeData[0].current }}C"
+      [data]="chargeData[0].stats"
+      xField="time"
+      yField="charge"
+      color="#3f0000"
+      [width]="3">
+    </kendo-chart-series-item>
+   
+    <kendo-chart-series-item
+    #surface
+      type="scatter"
+      name="{{ chargeData[1].current }}C"
+      [data]="chargeData[1].stats"
+      
+      xField="time"
+      yField="charge"
+      color="#399d60"
+      
       >
-      </kendo-chart-series-item>
-    </kendo-chart-series>
-  
-    <!-- X-Axis -->
-    <kendo-chart-x-axis>
-      <kendo-chart-x-axis-item [title]="{ text: 'Time (minutes)' }" [labels]="" [max]="100">
-        <kendo-chart-x-axis-item-crosshair>
-          <kendo-chart-x-axis-item-crosshair-tooltip format="{0}m"></kendo-chart-x-axis-item-crosshair-tooltip>
-        </kendo-chart-x-axis-item-crosshair>
-      </kendo-chart-x-axis-item>
-    </kendo-chart-x-axis>
-  
-    <!-- Y-Axis -->
-    <kendo-chart-y-axis>
-      <kendo-chart-y-axis-item [title]="{ text: 'Charge (%)' }" [labels]="{ format: '{0}%' }" [max]="100">
-        <kendo-chart-y-axis-item-crosshair>
-          <kendo-chart-y-axis-item-crosshair-tooltip format="{0}%"></kendo-chart-y-axis-item-crosshair-tooltip>
-        </kendo-chart-y-axis-item-crosshair>
-      </kendo-chart-y-axis-item>
-    </kendo-chart-y-axis>
-  
-    <!-- Tooltip -->
-    <kendo-chart-tooltip format="{1}% charge at {0} minutes"> </kendo-chart-tooltip>
-  </kendo-chart>
-  
+    </kendo-chart-series-item>
+    <kendo-chart-series-item
+      
+      type="scatterLine"
+      name="{{ chargeData[2].current }}C"
+      [data]="chargeData[2].stats"
+      xField="time"
+      yField="charge"
+      color="#ff1234"
+      [width]="7"
+      [markers]="{ type: 'square', size: 10 }"
+      >
+      <kendo-chart-series-item
+      
+      type="scatterLine"
+      name="{{ chargeData[3].current }}C"
+      [data]="chargeData[3].stats"
+      xField="time"
+      yField="charge"
+      color="#3f0000"
+      [width]="7"
+      [markers]="{ type: 'square', size: 10 }">
+    </kendo-chart-series-item>
+     >
+    </kendo-chart-series-item>
+  </kendo-chart-series>
 
+  <!-- X-Axis -->
+  <kendo-chart-x-axis>
+    <kendo-chart-x-axis-item [title]="{ text: 'Time (minutes)' }" [max]="100">
+    </kendo-chart-x-axis-item>
+  </kendo-chart-x-axis>
 
+  <!-- Y-Axis with String Labels -->
+  <kendo-chart-y-axis>
+    <kendo-chart-y-axis-item
+      [title]="{ text: 'Layers' }"
+      [labels]="{ content: labelTemplate }"
+      [max]="100">
+    </kendo-chart-y-axis-item>
+  </kendo-chart-y-axis>
 
-  
+  <!-- Tooltip -->
+  <kendo-chart-tooltip [padding]="10"  format=" getLabel({1}) at {0} minutes"></kendo-chart-tooltip>
+</kendo-chart>
+

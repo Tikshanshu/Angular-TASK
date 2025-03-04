@@ -59,15 +59,7 @@
                        filterClass="filterCustomClass">
                        
     </kendo-grid-column>
-
-    <kendo-grid-command-column title="command" [width]="220">
-      <ng-template kendoGridCellTemplate let-isNew="isNew">
-        <button kendoGridRemoveCommand>Remove</button>
-        <button kendoGridSaveCommand>Add</button>
-        <button kendoGridCancelCommand>Cancel</button>
-      </ng-template>
-    </kendo-grid-command-column>
-
+    
     
     <ng-template kendoGridDetailTemplate let-dataItem>
       <section *ngIf="dataItem.links?.length">

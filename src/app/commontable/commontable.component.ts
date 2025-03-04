@@ -53,6 +53,7 @@ export class CommontableComponent implements OnInit, OnChanges {
  
  public changes = {};
  public cellArgs: CellClickEvent;
+ public editedField: any;
 
  constructor(
    private formBuilder: FormBuilder,
@@ -104,29 +105,33 @@ export class CommontableComponent implements OnInit, OnChanges {
       case 'mfaanschlussbildschirm':
       case 'tarifortsname':
       case 'commentary':
+      case 'shortcode':
+      case "langbezeichner":
+      case 'Externalid':
+      case 'zonewabeindex':
+        case 'assetpictureindex':
+          case 'effectonccdelta':  
+      case 'tlpmode':
+      case 'fahrzeugansagetextindex':
+      case 'parenttableindex':
+      case 'haltestellensymbolindex':
+      case 'vorschauzeit':
         return 'text';
       
       case 'stopnumber':
       case 'haltestellenlangnummer':
-      case 'zonewabeindex':
-      case 'fahrzeugansagetextindex':
-      case 'parenttableindex':
-      case 'haltestellensymbolindex':
+      case "importstatus":
       case 'nationalstopnumber':
-      case 'assetpictureindex':
-      case 'effectonccdelta':
       case 'longitude':
       case 'latitude':
-      case 'haltestellenindex':
         return 'numeric';
-      case 'vorschauzeit':
-        return 'date';
       case 'isdepot':
         return 'boolean';
       default:
         return 'text';
     }
   }
+  
   
   public pageChange(event: PageChangeEvent): void {
     this.state.skip = event.skip;
@@ -141,31 +146,47 @@ export class CommontableComponent implements OnInit, OnChanges {
   
   public onDblClick(): void {
     if (!this.cellArgs.isEdited) {
-      this.cellArgs.sender.editCell(
-        this.cellArgs.rowIndex,
-        this.cellArgs.columnIndex,
-        this.createFormGroup(this.cellArgs.dataItem)
-      );
-    }
-  }
+        const formGroup = this.createFormGroup(this.cellArgs.dataItem);
+        const control = formGroup.get(this.editedField); 
 
-  public cellClickHandler(args: CellClickEvent): void {
-    this.cellArgs = args;
-  }
+        if (control) {
+            control.enable(); 
+        }
+
+        this.cellArgs.sender.editCell(this.cellArgs.rowIndex, this.cellArgs.columnIndex, formGroup);
+    }
+}
+
+
+
+public cellClickHandler(args: CellClickEvent): void {
+  this.cellArgs = args;
+  this.editedField = args.column.field;
+}
+
 
   public cellCloseHandler(args: CellCloseEvent): void {
     const { formGroup, dataItem } = args;
+    
+    if (formGroup.dirty && this.editedField) { // Ensure a field was edited
+        if (args.originalEvent && args.originalEvent.keyCode === Keys.Escape) {
+            return; // Ignore changes if Esc was pressed
+        }
 
-    if (formGroup.dirty) {
-      if (args.originalEvent && args.originalEvent.keyCode === Keys.Escape) {
-        return;
-      }
+        const control = formGroup.get(this.editedField); // Get only the edited field
 
-      this.editService.assignValues(dataItem, formGroup.value);
-      this.editService.update(dataItem);
+        if (control && control.invalid) {
+            // If invalid, revert to the original value
+            formGroup.patchValue({ [this.editedField]: dataItem[this.editedField] }, { emitEvent: false });
+        } else {
+            // If valid, update the data item with the new value
+            dataItem[this.editedField] = control?.value;
+            this.editService.update(dataItem);
+        }
     }
     console.log(args);
-  }
+}
+
 
   public addHandler(args: AddEvent): void {
     args.sender.addRow(this.createFormGroup(new Stop()));
@@ -199,33 +220,113 @@ export class CommontableComponent implements OnInit, OnChanges {
   }
 
   public createFormGroup(dataItem: Stop): FormGroup {
-    return this.formBuilder.group({
-      primarykeyduid: dataItem.primarykeyduid,
-      stopnumber: [dataItem.stopnumber, Validators.required],
-      shortcode: [dataItem.shortcode, Validators.required],
-      langbezeichner: [dataItem.langbezeichner, Validators.required],
-      externalid: dataItem.externalid,
-      haltestellenlangnummer: [dataItem.haltestellenlangnummer, Validators.required],
-      zonewabeindex: [dataItem.zonewabeindex, Validators.required],
-      ibisbezeichner: [dataItem.ibisbezeichner, Validators.required],
-      tlpmode: [dataItem.tlpmode, Validators.required],
-      fahrzeugansagetextindex: [dataItem.fahrzeugansagetextindex, Validators.required],
-      parenttableindex: dataItem.parenttableindex,
-      tarifortsname: dataItem.tarifortsname,
-      haltestellensymbolindex: dataItem.haltestellensymbolindex,
-      mfaanschlussbildschirm: dataItem.mfaanschlussbildschirm,
-      vorschauzeit: dataItem.vorschauzeit,
-      importstatus: [dataItem.importstatus, Validators.required],
-      commentary: dataItem.commentary,
-      nationalstopnumber: dataItem.nationalstopnumber,
-      stopiconforcc: dataItem.stopiconforcc,
-      assetpictureindex: dataItem.assetpictureindex,
-      effectonccdelta: dataItem.effectonccdelta,
-      isdepot: [dataItem.isdepot, Validators.required],
-      longitude: [dataItem.longitude, Validators.required],
-      latitude: [dataItem.latitude, Validators.required],
-      haltestellenindex: [dataItem.haltestellenindex, Validators.required],
+    const formGroup = this.formBuilder.group({
+      primarykeyduid: [
+        dataItem.primarykeyduid, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$')]
+      ],
+      stopnumber: [
+        dataItem.stopnumber,
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      shortcode: [
+        dataItem.shortcode, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$')]
+      ],
+      langbezeichner: [
+        dataItem.langbezeichner, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$'), Validators.minLength(3)]
+      ],
+      externalid: [
+        dataItem.externalid, 
+        [Validators.pattern('^[a-zA-Z0-9-_ ]*$')]
+      ],
+      haltestellenlangnummer: [
+        dataItem.haltestellenlangnummer, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      zonewabeindex: [
+        dataItem.zonewabeindex, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$')]
+      ],
+      ibisbezeichner: [
+        dataItem.ibisbezeichner, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$'), Validators.minLength(2)]
+      ],
+      tlpmode: [
+        dataItem.tlpmode, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$'), Validators.minLength(2)]
+      ],
+      fahrzeugansagetextindex: [
+        dataItem.fahrzeugansagetextindex, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$'), Validators.minLength(2)]
+      ],
+      parenttableindex: [
+        dataItem.parenttableindex, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      tarifortsname: [
+        dataItem.tarifortsname, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$')]
+      ],
+      haltestellensymbolindex: [
+        dataItem.haltestellensymbolindex, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      mfaanschlussbildschirm: [
+        dataItem.mfaanschlussbildschirm, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      vorschauzeit: [
+        dataItem.vorschauzeit, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      importstatus: [
+        dataItem.importstatus, 
+        [Validators.required, Validators.pattern('^[0-9]+$')]
+      ],
+      commentary: [
+        dataItem.commentary, 
+        [Validators.pattern('^[a-zA-Z0-9 ]*$'), Validators.maxLength(255)]
+      ],
+      nationalstopnumber: [
+        dataItem.nationalstopnumber, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      stopiconforcc: [
+        dataItem.stopiconforcc, 
+        [Validators.pattern('^[a-zA-Z0-9-_ ]*$')]
+      ],
+      assetpictureindex: [
+        dataItem.assetpictureindex, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      effectonccdelta: [
+        dataItem.effectonccdelta, 
+        [Validators.pattern('^[0-9]+$')]
+      ],
+      isdepot: [
+        dataItem.isdepot, 
+        [Validators.pattern('^(true|false|yes|no)$')]
+      ],
+      longitude: [
+        dataItem.longitude, 
+        [Validators.pattern('^-?\\d{1,3}\\.\\d+$')]
+      ],
+      latitude: [
+        dataItem.latitude, 
+        [ Validators.pattern('^-?\\d{1,2}\\.\\d+$')]
+      ],
+
     });
+
+     // Disable validation by default, enable only when editing
+     Object.keys(formGroup.controls).forEach(field => {
+      formGroup.get(field)?.disable(); // Disable validation initially
+  });
+    return formGroup;
   }
+
+  
   
 }
