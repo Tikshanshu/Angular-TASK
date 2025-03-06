@@ -2,27 +2,13 @@
     position: relative;
     width: 900px;
     height: 100px;
-    margin-top: 20px;
+    margin-top: 40px;
     background: #f3f3f3;
     border: 1px solid #ccc;
     overflow-x: scroll;
   }
 
-  .data-marker {
-    cursor: pointer;
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background-color: #ff5733;
-    border-radius: 50%;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    z-index: 10;
-  }
 
-  .data-marker kendo-icon {
-    font-size: 16px;
-    color: white;
-  }
+.charts{
+  margin-top: 60px;
+}

@@ -1,0 +1,53 @@
+ [
+    {
+      "current": 0.8,
+      "ylabel":"Stopping Point",
+      "y":20,
+      "stats": [
+        { "time": 10, "charge": 20,"ylabel":"A" },
+        { "time": 15, "charge": 20,"ylabel":"A" },
+        { "time": 20, "charge": 20,"ylabel":"A" },
+        { "time": 32, "charge": 20,"ylabel":"A" },
+        { "time": 43, "charge": 20,"ylabel":"A" },
+        { "time": 55, "charge": 20,"ylabel":"A" },
+        { "time": 60, "charge": 20,"ylabel":"A" },
+        { "time": 70, "charge": 20,"ylabel":"A" },
+        { "time": 90, "charge": 20,"ylabel":"A" }
+      ]
+     
+    },
+    {
+      "current": 1.6,
+      "ylabel":"Audio",
+      "y":40,
+      "stats": [
+        { "time": 10, "charge": 40,"ylabel":"B" },
+        { "time": 17, "charge": 40,"ylabel":"B" },
+        { "time": 18, "charge": 40,"ylabel":"B" },
+        { "time": 35, "charge": 40,"ylabel":"B" },
+        { "time": 47, "charge": 40,"ylabel":"B" },
+        { "time": 60, "charge": 40,"ylabel":"B" }
+      ]
+    },
+    {
+      "current": 3.2,
+      "ylabel":"Tariff Zone",
+      "y":80,
+      "stats": [
+        { "time": 10, "charge": 80,"ylabel":"D" },
+        { "time": 13, "charge": 80,"ylabel":"D" },
+        { "time": 25, "charge": 80,"ylabel":"D" }
+      ]
+    },
+    {
+      "current": 3.2,
+      "ylabel":"Tariff Zone",
+      "y":80,
+      "stats": [
+        { "time": 25, "charge": 80,"ylabel":"D" },
+        { "time": 43, "charge": 80,"ylabel":"D" },
+        { "time": 55, "charge": 80,"ylabel":"D" }
+      ]
+    }
+  ]
+
