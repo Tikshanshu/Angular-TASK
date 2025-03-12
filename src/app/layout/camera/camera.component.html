@@ -24,8 +24,7 @@
     [zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
     [pannable]="{ lock: 'y' }"
     (seriesClick)="onSeriesClick($event)"
-    (seriesHover)="onSeriesHover($event,chart)"
-    
+    (seriesHover)="onSeriesHover($event)"
     >
     
     <kendo-chart-plot-area background="#E8E8E8"></kendo-chart-plot-area>
@@ -46,7 +45,7 @@
         xField="time"
         yField="charge"
         color="#399d60">
-        <kendo-chart-series-item-markers [size]="1" [visual]="markerVisual"></kendo-chart-series-item-markers>
+        <kendo-chart-series-item-markers  [size]="1" [visual]="markerVisual"></kendo-chart-series-item-markers>
       </kendo-chart-series-item>
 
       <kendo-chart-series-item
@@ -85,20 +84,15 @@
         [max]="100">
       </kendo-chart-y-axis-item>
     </kendo-chart-y-axis>
+    <kendo-chart-tooltip  kendoTooltip  [padding]="10" >
+      <ng-template kendoChartSeriesTooltipTemplate let-dataitem="dataItem"let-value="value">
+         Value :{{dataitem.time}} , {{dataitem.charge}} 
+         abcde
+         fghjk
 
-   <kendo-chart-tooltip ></kendo-chart-tooltip>
-
+       </ng-template>
+   </kendo-chart-tooltip>
   </kendo-chart>
-  <kendo-popup
-      *ngIf="popupVisible && activePoint"
-      [offset]="popupOffset"
-     
-      [animate]="false"
-      [popupClass]="'chart-popup'">
-      <div class="popup-content">
-        <p>{{activePoint.charge}} at {{activePoint.time}}/any content</p>
-      </div>
-    </kendo-popup>
   
 </div>
 
