@@ -1,14 +1,72 @@
-#agglomerations {
-    position: relative;
-    width: 900px;
-    height: 100px;
-    margin-top: 40px;
-    background: #f3f3f3;
-    border: 1px solid #ccc;
-    overflow-x: scroll;
-  }
-
-
-.charts{
-  margin-top: 60px;
+.cam-comp {
+  display: flex;
+  padding: 5px;
+  flex-direction: column;
+  height: calc(100vh - 60px); // Adjust based on the height of your navbar
+  overflow: hidden;
 }
+
+.cam-grid {
+  width: 90%;
+  margin-left: 7%;
+  border:1px solid black;
+  flex: 1;
+  overflow: hidden;
+}
+
+.charts {
+  width: 90%;
+ margin-top: 1%;
+  margin-left: 7%;
+  border:1px solid black;
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 1200px) {
+  .cam-grid, .charts {
+    width: 95%;
+  }
+}
+
+@media (max-width: 768px) {
+  .cam-grid, .charts {
+    width: 100%;
+    margin: 10px auto 0 auto; // Adjust margins for smaller screens
+  }
+}
+
+@media (max-width: 480px) {
+  .cam-grid, .charts {
+    width: 100%;
+    margin: 10px auto 0 auto; // Adjust margins for smaller screens
+  }
+}
+
+
+.chart-popup {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  padding: 8px;
+
+}
+
+.popup-content {
+  padding: 5px;
+  min-width: 100px;
+  
+  background-color: #E8E8E8;
+  border: 1px solid black;
+
+  p {
+     
+    font-size: 15px;
+    color:black;
+  }
+}
+
+

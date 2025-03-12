@@ -1,97 +1,106 @@
-<div>
+<div class="cam-comp">
+
+
+
+<div  class="cam-grid">
   <kendo-grid
-  [data]="chargeData"
-  >
-  <ng-template kendoGridDetailTemplate let-dataItem>
-    <kendo-grid
-    [data]="dataItem.stats"
-    >
-
-    </kendo-grid>
-  </ng-template>
-
+    #grid
+    class="foo"
+    [data]="flattenedChargeData"
+    [scrollable]="'virtual'"
+    [rowHeight]="36"
+    [height]="445"
+    (cellClick)="cellClickHandler($event)"
+    [rowSelected]="isRowSelected"
+    [selectable]="{ mode: 'single' }">
   </kendo-grid>
 </div>
 
-<div class="charts">
-<kendo-chart style="width: 1000px; height:500px " [title]="{ text: 'Charge current vs. charge time' }"
-[zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
-[pannable]="{ lock: 'y' }"
-(seriesClick)="onSeriesClick($event)"
->
-<kendo-chart-plot-area background="#B2B6B0"> </kendo-chart-plot-area>
-  <!-- Data Series -->
-  <kendo-chart-series>
-    <kendo-chart-series-item
-      
-      type="scatterLine"
-      name="{{ chargeData[0].current }}C"
-      [data]="chargeData[0].stats"
-      xField="time"
-      yField="charge"
-      color="#3f0000"
-      [width]="3">
-    </kendo-chart-series-item>
-   
-    <kendo-chart-series-item
-     #announceSurface
-      type="scatter"
-      name="{{ chargeData[1].current }}C"
-      [data]="chargeData[1].stats"
-      xField="time"
-      yField="charge"
-      color="#399d60"
-      
-      >
-      <kendo-chart-series-item-markers [size]="1" [visual]="markerVisual" > 
-      </kendo-chart-series-item-markers>
-    </kendo-chart-series-item>
+<div class="charts" #chartContainer>
+  <kendo-chart
+ 
+    #chart
+    [title]="{ text: 'Chart' }"
+    [zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
+    [pannable]="{ lock: 'y' }"
+    (seriesClick)="onSeriesClick($event)"
+    (seriesHover)="onSeriesHover($event,chart)"
+    
+    >
+    
+    <kendo-chart-plot-area background="#E8E8E8"></kendo-chart-plot-area>
 
-    <kendo-chart-series-item 
-      type="scatterLine"
-      name="{{ chargeData[2].current }}C"
-      [data]="chargeData[2].stats"
-      xField="time"
-      yField="charge"
-      color="#ff1234"
-      [width]="7"
-      [markers]="{ visible:false}"
-      >
+    <kendo-chart-series #anch>
       <kendo-chart-series-item
-      
-      type="scatterLine"
-      name="{{ chargeData[3].current }}C"
-      [data]="chargeData[3].stats"
-      xField="time"
-      yField="charge"
-      color="#3f0000"
-      [width]="7"
-      [markers]="{ visible:false}">
-    </kendo-chart-series-item>
-     >
-    </kendo-chart-series-item>
-  </kendo-chart-series>
+        type="scatterLine"
+        [data]="chargeData[0].stats"
+        xField="time"
+        yField="charge"
+        color="#3f0000"
+        [width]="3">
+      </kendo-chart-series-item>
+    
+      <kendo-chart-series-item
+        type="scatter"
+        [data]="chargeData[1].stats"
+        xField="time"
+        yField="charge"
+        color="#399d60">
+        <kendo-chart-series-item-markers [size]="1" [visual]="markerVisual"></kendo-chart-series-item-markers>
+      </kendo-chart-series-item>
 
-  <!-- X-Axis -->
-  <kendo-chart-x-axis>
-    <kendo-chart-x-axis-item [title]="{ text: 'Time (minutes)' }" [max]="100">
-    </kendo-chart-x-axis-item>
-  </kendo-chart-x-axis>
+      <kendo-chart-series-item
+        type="scatterLine"
+        [data]="chargeData[2].stats"
+        xField="time"
+        yField="charge"
+        color="#ff1234"
+        [width]="7"
+        [markers]="{ visible:false }">
+        
+        <kendo-chart-series-item
+          type="scatterLine"
+          [data]="chargeData[3].stats"
+          xField="time"
+          yField="charge"
+          color="#3f0000"
+          [width]="7"
+          [markers]="{ visible:false }">
+        </kendo-chart-series-item>
+        
+      </kendo-chart-series-item>
+    </kendo-chart-series>
 
-  <!-- Y-Axis with String Labels -->
-  <kendo-chart-y-axis>
-    <kendo-chart-y-axis-item
-      [title]="{ text: 'Layers' }"
-      [labels]="{content: labelTemplate}"
-      [min]="10"
-      [max]="100"
-      >
-    </kendo-chart-y-axis-item>
-  </kendo-chart-y-axis>
+    <kendo-chart-x-axis>
+      <kendo-chart-x-axis-item  name="xAxis" type="numeric" [title]="{ text: 'X-axis' }" [min]="0" [max]="100"  ></kendo-chart-x-axis-item>
+    </kendo-chart-x-axis>
 
-  <!-- Tooltip -->
-  <kendo-chart-tooltip [padding]="10"  format=" {1} at {0} minutes"></kendo-chart-tooltip>
-</kendo-chart>
+    <kendo-chart-y-axis>
+      <kendo-chart-y-axis-item
+         name="yAxis"
+         type="numeric"
+        [title]="{ text: 'Layers' }"
+        [labels]="{ content: labelTemplate }"
+        [min]="10"
+        [max]="100">
+      </kendo-chart-y-axis-item>
+    </kendo-chart-y-axis>
+
+   <kendo-chart-tooltip ></kendo-chart-tooltip>
+
+  </kendo-chart>
+  <kendo-popup
+      *ngIf="popupVisible && activePoint"
+      [offset]="popupOffset"
+     
+      [animate]="false"
+      [popupClass]="'chart-popup'">
+      <div class="popup-content">
+        <p>{{activePoint.charge}} at {{activePoint.time}}/any content</p>
+      </div>
+    </kendo-popup>
+  
 </div>
 
+</div>
 

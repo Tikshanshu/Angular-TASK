@@ -39,12 +39,13 @@
     "@progress/kendo-angular-popup": "18.1.0",
     "@progress/kendo-angular-progressbar": "18.1.0",
     "@progress/kendo-angular-toolbar": "18.1.0",
+    "@progress/kendo-angular-tooltip": "^18.1.1",
     "@progress/kendo-angular-treeview": "18.1.0",
     "@progress/kendo-angular-utils": "18.1.0",
     "@progress/kendo-data-query": "^1.0.0",
     "@progress/kendo-drawing": "^1.21.2",
     "@progress/kendo-font-icons": "^4.0.0",
-    "@progress/kendo-licensing": "^1.4.0",
+    "@progress/kendo-licensing": "^1.5.1",
     "@progress/kendo-svg-icons": "^4.0.0",
     "@progress/kendo-theme-default": "^10.2.0",
     "bootstrap": "^5.3.3",
@@ -64,5 +65,17 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.7.2"
-  }
+  },
+  "description": "This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.5.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tikshanshu/Angular-TASK.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tikshanshu/Angular-TASK/issues"
+  },
+  "homepage": "https://github.com/Tikshanshu/Angular-TASK#readme"
 }

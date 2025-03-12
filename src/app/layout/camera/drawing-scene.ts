@@ -32,7 +32,7 @@
     const icon = new Text(iconUnicode, rect.center(), {
       font: `900 16px 'Font Awesome 6 Free' `, 
       fill: {
-        color: '#32cc00', // Customize color
+        color: '#5b5beb', // Customize color
       },
       cursor:'pointer',
 
@@ -40,7 +40,7 @@
 
     layout.append(icon);
     layout.reflow();
-    console.log(args)
+    
 
     return layout;
   };
