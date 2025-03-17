@@ -1,0 +1,66 @@
+.cam-comp {
+    height: calc(100vh - 60px); // Adjust based on the height of your navbar
+    width: 100%;
+    margin-left: 6%;
+    
+  }
+  
+  .cam-grid {
+    width: 90%;
+    height: 200px;
+    border:2px solid black;
+  }
+  
+  .charts {
+    width: 90%;
+    margin-top: 1%;
+    border:1px solid black;
+    height:420px;
+    
+  }
+  
+  /* Media queries for responsiveness */
+  @media (max-width: 1200px) {
+    .cam-grid, .charts {
+      width: 95%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .cam-grid, .charts {
+      width: 100%;
+      margin: 10px auto 0 auto; // Adjust margins for smaller screens
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .cam-grid, .charts {
+      width: 100%;
+      margin: 10px auto 0 auto; // Adjust margins for smaller screens
+    }
+  }
+  
+  
+  .chart-popup {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    padding: 8px;
+  
+  }
+  
+  .popup-content {
+    padding: 10px;
+    min-width: 100px;
+    height: 60px;
+    background-color: #8585dd;
+  
+    p {
+       
+      font-size: 20px;
+      color:black;
+    }
+  }
+  
+  
