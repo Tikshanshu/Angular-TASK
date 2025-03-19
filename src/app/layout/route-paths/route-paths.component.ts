@@ -15,6 +15,7 @@ import {
   SeriesTooltipTemplateDirective,
   ZoomEvent,
 } from '@progress/kendo-angular-charts';
+import { drawLines } from './line-draw';
 
 @Component({
   selector: 'app-route-paths',
@@ -106,10 +107,20 @@ export class RoutePathsComponent implements OnInit {
     console.log(event);
     
   }
+ 
   public onSeriesClick(event:SeriesClickEvent){
 
    const y=event.dataItem.beltId;
    const x=event.dataItem.time;
+
+    const prevX = event.dataItem.distanceFromPrev;
+    const nextX = event.dataItem.distanceToNext;
+    const yValue = event.dataItem.charge;
+
+
+    // drawLines(prevX,x,nextX,yValue);
+
+    
 
    if(y==='AudioAnnouncement'){
     alert('announcement');
@@ -201,4 +212,15 @@ getSeriesWidth(seriesType: string): number {
 }
 
 
+
+public xMin: number = -2000;
+public xMax: number = 20000;
+private zoomStep: number = 10;
+
+OnZoom(event:ZoomEvent){
+
+  console.log(event);
+
+
+}
 }

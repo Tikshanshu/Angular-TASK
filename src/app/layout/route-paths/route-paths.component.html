@@ -1,114 +1,197 @@
 <div class="cam-comp">
+  <div class="cam-grid">
+    <kendo-grid
+      #grid
+      class="foo"
+      [data]="chargeData"
+      [scrollable]="'virtual'"
+      [rowHeight]="16"
+      [height]="195"
+      [resizable]="true"
+      (cellClick)="cellClickHandler($event)"
+      [rowSelected]="isRowSelected"
+      [selectable]="{ mode: 'single' }"
+    >
+      <kendo-grid-column
+        field="PatternSequenceGraphInfo.BeltIdentifier"
+        title="Belt Identifier"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="Identifier"
+        title="Identifier"
+        [width]="100"
+      ></kendo-grid-column>
 
+      <kendo-grid-column
+        field="RouteIndex"
+        title="Route Index"
+        [width]="120"
+      ></kendo-grid-column>
 
+      <kendo-grid-column
+        field="DistanceFromStart"
+        title="Distance From Start"
+        [width]="180"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="DistanceFromPrevSeqPoint"
+        title="Distance From Prev Seq Point"
+        [width]="220"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="DistanceToNextSeqPoint"
+        title="Distance To Next Seq Point"
+        [width]="220"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="SequenceNumber"
+        title="Sequence Number"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="PatternSegmentIndex"
+        title="Pattern Segment Index"
+        [width]="180"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="PointType"
+        title="Point Type"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="IbisPlusActionInfo"
+        title="Ibis Plus Action Info"
+        [width]="180"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="GdmTableAttrKeyValues"
+        title="Gdm Table Attr Key Values"
+        [width]="220"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="PatternIndex"
+        title="Pattern Index"
+        [width]="120"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="PatternSequenceGraphInfo.BeltName"
+        title="Belt Name"
+        [width]="250"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="ExtraMapPoints"
+        title="Extra Map Points"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="GuiMapPoint"
+        title="GUI Map Point"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="GuiMapLine"
+        title="GUI Map Line"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="IsShownInGui"
+        title="Is Shown In GUI"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="PointIndex"
+        title="Point Index"
+        [width]="150"
+      ></kendo-grid-column>
+      <kendo-grid-column
+        field="StopPointIndex"
+        title="Stop Point Index"
+        [width]="150"
+      ></kendo-grid-column>
+    </kendo-grid>
+  </div>
 
-    <div  class="cam-grid">
-      <kendo-grid
-        #grid
-        class="foo"
-        [data]="chargeData"
-        [scrollable]="'virtual'"
-        [rowHeight]="16"
-        [height]="195"
-        [resizable]="true"
-        (cellClick)="cellClickHandler($event)"
-        [rowSelected]="isRowSelected"
-        [selectable]="{ mode: 'single' }">
+  <div class="charts" id="chartContainer">
+    <kendo-chart
+    style="height: 260px;"
+      #chart
+      [zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
+      [pannable]="{ lock: 'y' }"
+      (seriesClick)="onSeriesClick($event)"
+      (seriesHover)="onSeriesHover($event)"
+      (zoom)="OnZoom($event)"
+    >
+      <kendo-chart-legend position="bottom"></kendo-chart-legend>
 
-        <kendo-grid-column field="PatternSequenceGraphInfo.BeltIdentifier" title="Belt Identifier" [width]="150"></kendo-grid-column>
-        <kendo-grid-column field="Identifier" title="Identifier" [width]="100"></kendo-grid-column>
-    
-      <kendo-grid-column field="RouteIndex" title="Route Index" [width]="120"></kendo-grid-column>
-      
-     
-      <kendo-grid-column field="DistanceFromStart" title="Distance From Start" [width]="180"></kendo-grid-column>
-      <kendo-grid-column field="DistanceFromPrevSeqPoint" title="Distance From Prev Seq Point" [width]="220"></kendo-grid-column>
-      <kendo-grid-column field="DistanceToNextSeqPoint" title="Distance To Next Seq Point" [width]="220"></kendo-grid-column>
-      <kendo-grid-column field="SequenceNumber" title="Sequence Number" [width]="150"></kendo-grid-column>
-      <kendo-grid-column field="PatternSegmentIndex" title="Pattern Segment Index" [width]="180"></kendo-grid-column>
-      <kendo-grid-column field="PointType" title="Point Type" [width]="150"></kendo-grid-column>
-      <kendo-grid-column field="IbisPlusActionInfo" title="Ibis Plus Action Info" [width]="180"></kendo-grid-column>
-      <kendo-grid-column field="GdmTableAttrKeyValues" title="Gdm Table Attr Key Values" [width]="220"></kendo-grid-column>
-      <kendo-grid-column field="PatternIndex" title="Pattern Index" [width]="120"></kendo-grid-column>
-      <kendo-grid-column field="PatternSequenceGraphInfo.BeltName" title="Belt Name" [width]="250"></kendo-grid-column>
-      <kendo-grid-column field="ExtraMapPoints" title="Extra Map Points" [width]="150"></kendo-grid-column>
-      <kendo-grid-column field="GuiMapPoint" title="GUI Map Point" [width]="150"></kendo-grid-column>
-      <kendo-grid-column field="GuiMapLine" title="GUI Map Line" [width]="150"></kendo-grid-column>
-      <kendo-grid-column field="IsShownInGui" title="Is Shown In GUI" [width]="150"></kendo-grid-column>
-      <kendo-grid-column field="PointIndex" title="Point Index" [width]="150"></kendo-grid-column>
-      <kendo-grid-column field="StopPointIndex" title="Stop Point Index" [width]="150"></kendo-grid-column>
-      
-      </kendo-grid>
-    </div>
-    
-    <div class="charts" #chartContainer>
-        <kendo-chart  
-        #chart 
-        [zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
-        [pannable]="{ lock: 'y' }"
-        (seriesClick)="onSeriesClick($event)"
-        (seriesHover)="onSeriesHover($event)"
+      <kendo-chart-series>
+        <ng-container *ngFor="let dataGroup of transformedData">
+          <kendo-chart-series-item
+            [type]="
+              dataGroup.current === 'AudioAnnouncement'
+                ? 'scatter'
+                : 'scatterLine'
+            "
+            [data]="dataGroup.stats"
+            [color]="getSeriesColor(dataGroup.current)"
+            [width]="getSeriesWidth(dataGroup.current)"
+            xField="time"
+            yField="charge"
+          >
+            <!-- Tooltip Configuration -->
+            <kendo-chart-series-item-tooltip format="{0}" [visible]="true">
+              <ng-template let-point="point">
+                <strong>Belt ID:</strong> {{ point.dataItem.beltId }} <br />
+                <strong>Distance From Start:</strong> {{ point.dataItem.time }}
+                <br />
+                <strong>Charge:</strong> {{ point.dataItem.charge }} <br />
+                <strong>Point Type:</strong> {{ point.dataItem.pointType }}
+                <br />
+                <strong>Trip Index:</strong> {{ point.dataItem.tripIndex }}
+                <br />
+                <strong>Route Index:</strong> {{ point.dataItem.routeIndex }}
+                <br />
+                <strong>Pattern Index:</strong>
+                {{ point.dataItem.patternIndex }} <br />
+                <strong>Distance From Prev:</strong>
+                {{ point.dataItem.distanceFromPrev }} <br />
+                <strong>Distance To Next:</strong>
+                {{ point.dataItem.distanceToNext }} <br />
+              </ng-template>
+            </kendo-chart-series-item-tooltip>
+
+            <kendo-chart-series-item-markers
+              *ngIf="dataGroup.current === 'AudioAnnouncement'"
+              [size]="1"
+              [visual]="markerVisual"
+            >
+            </kendo-chart-series-item-markers>
+          </kendo-chart-series-item>
+        </ng-container>
+      </kendo-chart-series>
+      <kendo-chart-x-axis>
+        <kendo-chart-x-axis-item
+          name="xAxis"
+          type="numeric"
+          [min]="xMin"
+          [max]="xMax"
+          [majorUnit]="1500"
+          [labels]="{ step: 1, format: '0' }"
+        ></kendo-chart-x-axis-item>
+      </kendo-chart-x-axis>
+      <kendo-chart-y-axis>
+        <kendo-chart-y-axis-item
+          name="yAxis"
+          type="numeric"
+          [min]="0"
+          [max]="120"
         >
-            
-            <kendo-chart-legend position="bottom"></kendo-chart-legend>
-        
-            <kendo-chart-series>
-                <ng-container *ngFor="let dataGroup of transformedData">
-                    <kendo-chart-series-item 
-                        [type]="dataGroup.current === 'AudioAnnouncement' ? 'scatter' : 'scatterLine'"
-                        [data]="dataGroup.stats"
-                        [color]="getSeriesColor(dataGroup.current)"
-                        [width]="getSeriesWidth(dataGroup.current)"
-                       
-                        xField="time"
-                        yField="charge">
-                        
-                        <!-- Tooltip Configuration -->
-                        <kendo-chart-series-item-tooltip format="{0}" [visible]="true">
-                            <ng-template let-point="point">
-                                <strong>Belt ID:</strong> {{ point.dataItem.beltId }} <br>
-                                <strong>Distance From Start:</strong> {{ point.dataItem.time }} <br>
-                                <strong>Charge:</strong> {{ point.dataItem.charge }} <br>
-                                <strong>Point Type:</strong> {{ point.dataItem.pointType }} <br>
-                                <strong>Trip Index:</strong> {{ point.dataItem.tripIndex }} <br>
-                                <strong>Route Index:</strong> {{ point.dataItem.routeIndex }} <br>
-                                <strong>Pattern Index:</strong> {{ point.dataItem.patternIndex }} <br>
-                                <strong>Distance From Prev:</strong> {{ point.dataItem.distanceFromPrev }} <br>
-                                <strong>Distance To Next:</strong> {{ point.dataItem.distanceToNext }} <br>
-                            </ng-template>
-                        </kendo-chart-series-item-tooltip>
-                        
-                        <kendo-chart-series-item-markers 
-                            *ngIf="dataGroup.current === 'AudioAnnouncement'" 
-                            [size]="1" 
-                            [visual]="markerVisual">
-                        </kendo-chart-series-item-markers>
-                
-                    </kendo-chart-series-item>
-                </ng-container>
-                
-            </kendo-chart-series>
-            <kendo-chart-x-axis>
-                <kendo-chart-x-axis-item  name="xAxis" type="numeric"  [min]="-2000" [max]="20000"  ></kendo-chart-x-axis-item>
-              </kendo-chart-x-axis>
-              <kendo-chart-y-axis>
-                <kendo-chart-y-axis-item
-                   name="yAxis"
-                   type="numeric"
-                  
-                  [min]="0"
-                  [max]="120">
-                  <kendo-chart-y-axis-item-labels  [content]=" labelTemplate" [position]="'start'"></kendo-chart-y-axis-item-labels>
-                 
-                </kendo-chart-y-axis-item>
-                
-               
-              </kendo-chart-y-axis>
-          
-        </kendo-chart>
-        
-    </div>
-    
-    </div>
-    
-    
+          <kendo-chart-y-axis-item-labels
+            [content]="labelTemplate"
+            [position]="'start'"
+          ></kendo-chart-y-axis-item-labels>
+        </kendo-chart-y-axis-item>
+      </kendo-chart-y-axis>
+    </kendo-chart>
+  </div>
+</div>

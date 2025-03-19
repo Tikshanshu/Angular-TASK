@@ -1,4 +1,4 @@
-import { drawing } from "@progress/kendo-drawing";
+
 import {
   Element,
   geometry,
@@ -11,7 +11,7 @@ import {
 const { Rect, Point } = geometry;
 
 export function markerVisual(args: any): Element {
-  console.log(args);
+ 
 
   // Adjusting position of the icon (10 units left)
   const iconPosition = new Point(args.rect.origin.x - 10, args.rect.origin.y);
@@ -53,7 +53,7 @@ export function markerVisual(args: any): Element {
 
   // Constructing a caret (^) shape
   path.moveTo(iconX, iconY) // Start from icon position
-    .lineTo((iconX + actualX) / 2, iconY - 50) // Peak of ^
+    .lineTo((iconX + actualX) / 2, iconY - 30) // Peak of ^
     .lineTo(actualX, actualY); // Connect to actual point
 
   // Create a group to hold both icon and caret shape
