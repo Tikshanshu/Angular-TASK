@@ -13,34 +13,34 @@
       [selectable]="{ mode: 'single' }"
     >
       <kendo-grid-column
-        field="PatternSequenceGraphInfo.BeltIdentifier"
+        field="patternsequencegraphinfo.BeltIdentifier"
         title="Belt Identifier"
         [width]="150"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="Identifier"
+        field="identifier"
         title="Identifier"
         [width]="100"
       ></kendo-grid-column>
 
       <kendo-grid-column
-        field="RouteIndex"
+        field="routeindex"
         title="Route Index"
         [width]="120"
       ></kendo-grid-column>
 
       <kendo-grid-column
-        field="DistanceFromStart"
+        field="distancefromstart"
         title="Distance From Start"
         [width]="180"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="DistanceFromPrevSeqPoint"
+        field="distancefromprevseqpoint"
         title="Distance From Prev Seq Point"
         [width]="220"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="DistanceToNextSeqPoint"
+        field="distancetonextseqpoint"
         title="Distance To Next Seq Point"
         [width]="220"
       ></kendo-grid-column>
@@ -50,27 +50,27 @@
         [width]="150"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="PatternSegmentIndex"
+        field="patternsegmentindex"
         title="Pattern Segment Index"
         [width]="180"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="PointType"
+        field="pointtype"
         title="Point Type"
         [width]="150"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="IbisPlusActionInfo"
+        field="ibisplusactioninfo"
         title="Ibis Plus Action Info"
         [width]="180"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="GdmTableAttrKeyValues"
+        field="gdmtableattrkeyvalues"
         title="Gdm Table Attr Key Values"
         [width]="220"
       ></kendo-grid-column>
       <kendo-grid-column
-        field="PatternIndex"
+        field="patternindex"
         title="Pattern Index"
         [width]="120"
       ></kendo-grid-column>
@@ -79,58 +79,34 @@
         title="Belt Name"
         [width]="250"
       ></kendo-grid-column>
-      <kendo-grid-column
-        field="ExtraMapPoints"
-        title="Extra Map Points"
-        [width]="150"
-      ></kendo-grid-column>
-      <kendo-grid-column
-        field="GuiMapPoint"
-        title="GUI Map Point"
-        [width]="150"
-      ></kendo-grid-column>
-      <kendo-grid-column
-        field="GuiMapLine"
-        title="GUI Map Line"
-        [width]="150"
-      ></kendo-grid-column>
-      <kendo-grid-column
-        field="IsShownInGui"
-        title="Is Shown In GUI"
-        [width]="150"
-      ></kendo-grid-column>
-      <kendo-grid-column
-        field="PointIndex"
-        title="Point Index"
-        [width]="150"
-      ></kendo-grid-column>
-      <kendo-grid-column
-        field="StopPointIndex"
-        title="Stop Point Index"
-        [width]="150"
-      ></kendo-grid-column>
     </kendo-grid>
   </div>
+  <div>
+    <button (click)="resetZoom()">Reset zoom</button>
+  </div>
+
 
   <div class="charts" id="chartContainer">
     <kendo-chart
-    style="height: 260px;"
+    style="height: 360px;"
       #chart
       [zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
       [pannable]="{ lock: 'y' }"
       (seriesClick)="onSeriesClick($event)"
       (seriesHover)="onSeriesHover($event)"
-      (zoom)="OnZoom($event)"
+      [categoryAxis]="categoryAxis"
+      [valueAxis]="valueAxis"
+  
     >
       <kendo-chart-legend position="bottom"></kendo-chart-legend>
 
       <kendo-chart-series>
-        <ng-container *ngFor="let dataGroup of transformedData">
+        <ng-container *ngFor="let dataGroup of transformedData let i = index">
           <kendo-chart-series-item
             [type]="
               dataGroup.current === 'AudioAnnouncement'
                 ? 'scatter'
-                : 'scatterLine'
+                : 'scatterLine' 
             "
             [data]="dataGroup.stats"
             [color]="getSeriesColor(dataGroup.current)"
@@ -173,9 +149,7 @@
         <kendo-chart-x-axis-item
           name="xAxis"
           type="numeric"
-          [min]="xMin"
-          [max]="xMax"
-          [majorUnit]="1500"
+          [majorUnit]="5000"
           [labels]="{ step: 1, format: '0' }"
         ></kendo-chart-x-axis-item>
       </kendo-chart-x-axis>
@@ -184,7 +158,7 @@
           name="yAxis"
           type="numeric"
           [min]="0"
-          [max]="120"
+          [max]="140"
         >
           <kendo-chart-y-axis-item-labels
             [content]="labelTemplate"
@@ -193,5 +167,12 @@
         </kendo-chart-y-axis-item>
       </kendo-chart-y-axis>
     </kendo-chart>
+    
+    <kendo-contextmenu #gridmenu [items]="items">
+      <ng-template kendoMenuItemTemplate let-item="item">
+          {{ item.text }}
+      </ng-template>
+  </kendo-contextmenu>
   </div>
+  
 </div>

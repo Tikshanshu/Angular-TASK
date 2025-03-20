@@ -22,7 +22,7 @@ export function drawLines(prevX: number, currentX: number, nextX: number, yValue
     // Red line from previous point to current
     const prevLine = new Path({
         stroke: { color: "red", width: 2 }
-    }).moveTo(prevX, yValue).lineTo(currentX, yValue);
+    }).moveTo(prevX, yValue).lineTo(prevX+1, yValue);
 
     // Blue line from current to next
     const nextLine = new Path({
@@ -32,7 +32,7 @@ export function drawLines(prevX: number, currentX: number, nextX: number, yValue
     // Dashed vertical line through the current point
     const verticalLine = new Path({
         stroke: { color: "black", width: 1, dashType: "dash" }
-    }).moveTo(currentX, 0).lineTo(currentX, 120); 
+    }).moveTo(currentX, 0).lineTo(currentX, 160); 
 
     group.append(prevLine, nextLine, verticalLine);
     surface.draw(group);

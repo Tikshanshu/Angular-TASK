@@ -14,7 +14,7 @@ export function markerVisual(args: any): Element {
  
 
   // Adjusting position of the icon (10 units left)
-  const iconPosition = new Point(args.rect.origin.x - 10, args.rect.origin.y);
+  const iconPosition = new Point(args.rect.origin.x - 25, args.rect.origin.y);
   const rect = new Rect(iconPosition, args.rect.size);
 
   // Create layout for positioning
