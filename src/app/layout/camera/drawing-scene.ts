@@ -1,4 +1,3 @@
-
 import {
   Element,
   geometry,
@@ -11,55 +10,64 @@ import {
 const { Rect, Point } = geometry;
 
 export function markerVisual(args: any): Element {
- 
-
-  // Adjusting position of the icon (10 units left)
-  const iconPosition = new Point(args.rect.origin.x - 25, args.rect.origin.y);
+  const point = args.dataItem;
+  const isStartAnnouncement = point.isStartAnnouncement;
+  const iconPosition = new Point(args.rect.origin.x, args.rect.origin.y);
   const rect = new Rect(iconPosition, args.rect.size);
-
-  // Create layout for positioning
   const layout = new Layout(rect, {
     orientation: "vertical",
     alignItems: "center",
     justifyContent: "center",
   });
 
-  // Announcement Icon (FontAwesome Unicode)
-  const iconUnicode = "\uf028";
+  if (isStartAnnouncement) {
+    const iconUnicode = "\uf028";
+    const icon = new Text(iconUnicode, rect.center(), {
+      font: `900 16px 'Font Awesome 6 Free'`,
+      fill: {
+        color: "#5b5beb",
+      },
+      cursor: "pointer",
+    });
 
-  const icon = new Text(iconUnicode, rect.center(), {
-    font: `900 16px 'Font Awesome 6 Free'`,
-    fill: {
-      color: "#5b5beb", // Customize color
-    },
-    cursor: "pointer",
-  });
+    layout.append(icon);
+    layout.reflow();
 
-  layout.append(icon);
-  layout.reflow();
+    const path = new Path({
+      stroke: {
+        color: "#000",
+        width: 0.5,
+      },
+    });
 
-  // Create a caret (^) shape path from icon to actual point
-  const path = new Path({
-    stroke: {
-      color: "#000", // Black color for the caret shape
-      width: .5,
-    },
-  });
+  // Get the chart axis
+  const categoryAxis = args.sender.findAxisByName('xAxis');
+    
+  // Convert data values to screen coordinates
+  const startX = iconPosition.x;
+  const announcementLength = parseFloat(point.announcementLength);
+  
+  // Convert the announcement length to screen coordinates
+  const endXData = point.time + announcementLength;
+  const endXScreen = categoryAxis.slot(endXData).center().x;
+  
+  // Calculate midpoint in screen coordinates
+  const peakX = startX + (endXScreen - startX) / 2;
+  const endX = endXScreen;
 
-  const iconX = iconPosition.x;
   const iconY = iconPosition.y;
-  const actualX = args.rect.origin.x;
-  const actualY = args.rect.origin.y;
+  
+  // Draw the path
+  path.moveTo(startX, iconY)
+      .lineTo(peakX, iconY - 30)
+      .lineTo(endX, iconY);
 
-  // Constructing a caret (^) shape
-  path.moveTo(iconX, iconY) // Start from icon position
-    .lineTo((iconX + actualX) / 2, iconY - 30) // Peak of ^
-    .lineTo(actualX, actualY); // Connect to actual point
+    const group = new Group();
+    group.append(layout);
+    group.append(path);
 
-  // Create a group to hold both icon and caret shape
-  const group = new Group();
-  group.append(layout);
-  group.append(path);
-
-  return group;
+    return group;
+  } else {
+    return args.createVisual();
+  }
 }

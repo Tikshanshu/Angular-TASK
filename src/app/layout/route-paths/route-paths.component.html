@@ -81,21 +81,20 @@
       ></kendo-grid-column>
     </kendo-grid>
   </div>
-  <div>
-    <button (click)="resetZoom()">Reset zoom</button>
-  </div>
 
-
-  <div class="charts" id="chartContainer">
+  <div class="charts" id="chartContainer"  style="overflow-x: auto" >
     <kendo-chart
-    style="height: 360px;"
+    style="height: 290px; "
+   
       #chart
-      [zoomable]="{ mousewheel: { lock: 'y' }, selection: { lock: 'y' } }"
+      [zoomable]="{ mousewheel: { lock: 'y',rate: zoomrate }, selection: { lock: 'y' }  }"
+    
       [pannable]="{ lock: 'y' }"
       (seriesClick)="onSeriesClick($event)"
       (seriesHover)="onSeriesHover($event)"
       [categoryAxis]="categoryAxis"
       [valueAxis]="valueAxis"
+      (render)="onRender($event)"
   
     >
       <kendo-chart-legend position="bottom"></kendo-chart-legend>
@@ -103,14 +102,15 @@
       <kendo-chart-series>
         <ng-container *ngFor="let dataGroup of transformedData let i = index">
           <kendo-chart-series-item
+        
             [type]="
               dataGroup.current === 'AudioAnnouncement'
                 ? 'scatter'
                 : 'scatterLine' 
             "
             [data]="dataGroup.stats"
-            [color]="getSeriesColor(dataGroup.current)"
-            [width]="getSeriesWidth(dataGroup.current)"
+            [color]="getseriesColor(dataGroup.current)"
+            [width]="getseriesWidth(dataGroup.current)"
             xField="time"
             yField="charge"
           >
@@ -133,6 +133,10 @@
                 {{ point.dataItem.distanceFromPrev }} <br />
                 <strong>Distance To Next:</strong>
                 {{ point.dataItem.distanceToNext }} <br />
+                <ng-container *ngIf="point.dataItem.beltId === 'AudioAnnouncement'">
+                  <strong>Announcement Length:</strong> {{ point.dataItem.announcementLength }} <br />
+                  <strong>Announcement Duration:</strong> {{ point.dataItem.announcementDuration }} <br />
+                </ng-container>
               </ng-template>
             </kendo-chart-series-item-tooltip>
 
@@ -149,8 +153,19 @@
         <kendo-chart-x-axis-item
           name="xAxis"
           type="numeric"
-          [majorUnit]="5000"
-          [labels]="{ step: 1, format: '0' }"
+          [min]="-200"
+          [max]="1000"
+          
+          [majorTicks]="majorTicks"
+          [majorUnit]="50"
+          [labels]="{  step: 1, format: '0' }"
+          [color]="'black'"
+          [crosshair]="{
+            visible: true,
+            tooltip: { visible: true, format: '{0}' },
+           
+          }"
+         
         ></kendo-chart-x-axis-item>
       </kendo-chart-x-axis>
       <kendo-chart-y-axis>
@@ -159,14 +174,32 @@
           type="numeric"
           [min]="0"
           [max]="140"
+          [crosshair]="{
+            visible: true,
+            tooltip: { visible: true, format: '{0}' },
+            color: '#d75463',
+          }"
+         
+        
         >
           <kendo-chart-y-axis-item-labels
             [content]="labelTemplate"
             [position]="'start'"
+            [color]="'black'"
           ></kendo-chart-y-axis-item-labels>
         </kendo-chart-y-axis-item>
       </kendo-chart-y-axis>
+
+
+
     </kendo-chart>
+
+    <!-- Toolbar -->
+    <div class="chart-toolbar">
+      <button (click)="resetZoom()">Reset Zoom</button>
+      <button >Button 1</button>
+      <button >Button 2</button>
+    </div>
     
     <kendo-contextmenu #gridmenu [items]="items">
       <ng-template kendoMenuItemTemplate let-item="item">

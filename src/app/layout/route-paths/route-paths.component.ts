@@ -14,6 +14,7 @@ import {
   ChartComponent,
   ChartsModule,
   PlotAreaClickEvent,
+  RenderEvent,
   SelectEndEvent,
   SeriesClickEvent,
   SeriesHoverEvent,
@@ -26,6 +27,17 @@ import {
   KENDO_CONTEXTMENU,
 } from '@progress/kendo-angular-menu';
 import { ContextMenuModule } from '@progress/kendo-angular-menu';
+
+import {
+  getSeriesColor,
+  getSeriesWidth,
+  handleMenuAction,
+  getContextMenuItems,
+  resetZoom,
+
+} from './helper';
+import { geometry, Group, Path } from '@progress/kendo-drawing';
+
 @Component({
   selector: 'app-route-paths',
   standalone: true,
@@ -43,22 +55,56 @@ import { ContextMenuModule } from '@progress/kendo-angular-menu';
 export class RoutePathsComponent implements OnInit {
   @ViewChild('chart', { static: false }) chart: ChartComponent;
   @ViewChild('grid', { static: false }) grid: GridComponent;
-
+  @ViewChild('gridmenu') public ChartContextMenu: ContextMenuComponent;
   public chargeData = Jdata;
-
   beltIdentifiers: string[] = [];
   transformedData: { current: string; stats: any[] }[] = [];
   labelMap: { [key: string]: number } = {};
-  beltLabelNames: { [key: number]: string } = {}; // Maps Y-axis values to BeltIdentifiers dynamically
+  beltLabelNames: { [key: number]: string } = {};
+  getseriesColor = getSeriesColor;
+  getseriesWidth = getSeriesWidth;
+  handleMenuAction = handleMenuAction;
+  getContextMenuItems = getContextMenuItems;
+  resetZoom = resetZoom;
+ 
+  public markerVisual = markerVisual;
+  public minX = 0;
+  public maxX = 0;
+  public majorGridLines = {
+    color: 'lightgray',
+    visible: true,
+  };
+  public majorTicks = {
+    color: 'black',
+    size: 15,
+  };
+  public zoomrate = 0.1;
+  public toggler: boolean = true;
+  public mySelection: number[] = [];
+  selectedRowIndex: number | null = null;
+  public highlightedPoints = new Set<string>();
+  private zoomStep: number = 10;
+  private contextItem: any;
+  public items: any[] = [];
+
+  public valueAxis = {
+    name: 'value',
+    labels: {
+      format: '#.00',
+    },
+  };
+
+  public categoryAxis = {
+    name: 'category',
+    maxDivisions: 10,
+  };
 
   ngOnInit() {
     this.processData();
     this.transformData();
-    console.log(this.transformedData);
+    
     
   }
-
-  public markerVisual = markerVisual;
 
   processData() {
     this.beltIdentifiers = [
@@ -89,31 +135,54 @@ export class RoutePathsComponent implements OnInit {
         .filter(
           (item) => item.patternsequencegraphinfo?.BeltIdentifier === identifier
         )
-        .map((item) => ({
-          time: item.distancefromstart,
-          beltIdent: item.patternsequencegraphinfo.BeltIdentifier,
-          charge: this.labelMap[identifier] || 0,
-          beltId: identifier,
-          distanceFromPrev: item.distancefromprevseqpoint,
-          distanceToNext: item.distancetonextseqpoint,
-          stopName: item.guirepresentationtext,
-          pointType: item.pointtype,
-          tripIndex: item.tripindex,
-          routeIndex: item.routeindex,
-          patternIndex: item.patternindex,
+        .map((item) => {
+          // Check if the point is a start or end of the announcement
+          const isStartAnnouncement = item.guimapline?.Attributes !== undefined;
+          const isEndAnnouncement = item.guimappoint?.Attributes !== undefined;
 
-        })),
+          this.minX = Math.min(this.minX, item.distancefromstart);
+          this.maxX = Math.max(this.maxX, item.distancefromstart);
+
+          return {
+            time: item.distancefromstart,
+            beltIdent: item.patternsequencegraphinfo.BeltIdentifier,
+            charge: this.labelMap[identifier] || 0,
+            beltId: identifier,
+            distanceFromPrev: item.distancefromprevseqpoint,
+            distanceToNext: item.distancetonextseqpoint,
+            stopName: item.guirepresentationtext,
+            pointType: item.pointtype,
+            tripIndex: item.tripindex,
+            routeIndex: item.routeindex,
+            patternIndex: item.patternindex,
+            // Extract Announcement Length and Duration based on whether it's a start or end
+            announcementLength: isStartAnnouncement
+              ? item.guimapline?.Attributes?.find(
+                  (attr) => attr.Name === 'Announcement Length'
+                )?.Value
+              : isEndAnnouncement
+              ? item.guimappoint?.Attributes?.find(
+                  (attr) => attr.Name === 'Announcement Length'
+                )?.Value
+              : null,
+            announcementDuration: isStartAnnouncement
+              ? item.guimapline?.Attributes?.find(
+                  (attr) => attr.Name === 'Announcement Duration'
+                )?.Value
+              : isEndAnnouncement
+              ? item.guimappoint?.Attributes?.find(
+                  (attr) => attr.Name === 'Announcement Duration'
+                )?.Value
+              : null,
+            isStartAnnouncement: isStartAnnouncement,
+          };
+        }),
     }));
   }
 
   public labelTemplate = (args: any) => {
     return this.beltLabelNames[args.value] || '';
   };
-
-  public toggler: boolean = true;
-  public mySelection: number[] = [];
-  selectedRowIndex: number | null = null;
-  public highlightedPoints = new Set<string>();
 
   public cellClickHandler(event: CellClickEvent): void {
     const y = event.dataItem.patternsequencegraphinfo?.BeltIdentifier;
@@ -125,8 +194,9 @@ export class RoutePathsComponent implements OnInit {
       dataItem: {
         beltId: y,
         time: x,
-        distanceFromPrev: dpp,
-        distanceToNext: dnp,
+        distancefromprevseqpoint: dpp,
+        distancetonextseqpoint: dnp,
+        charge: y,
       },
     } as SeriesClickEvent);
   }
@@ -139,8 +209,6 @@ export class RoutePathsComponent implements OnInit {
     const nextX = event.dataItem.distancetonextseqpoint;
     const yValue = event.dataItem.charge;
 
-    // drawLines(x, prevX, nextX, yValue);
-
     const selectedIndex = this.chargeData.findIndex(
       (item) =>
         item.distancefromstart === x &&
@@ -151,7 +219,7 @@ export class RoutePathsComponent implements OnInit {
       this.mySelection = [selectedIndex];
     }
     setTimeout(() => {
-      this.scrollToRow(selectedIndex);
+     this.scrollToRow(selectedIndex);
     }, 100);
 
     this.toggleChartHighlight(event);
@@ -187,13 +255,19 @@ export class RoutePathsComponent implements OnInit {
       event.originalEvent.preventDefault();
 
       this.contextItem = event.dataItem;
-      this.items = this.getContextMenuItems(y);
+      this.items = getContextMenuItems(y);
 
       this.ChartContextMenu.show({
         left: event.originalEvent.pageX,
         top: event.originalEvent.pageY,
       });
     }
+
+  this.crosshairValue = {
+    x: x,
+    y: yValue 
+  };
+  this.renderCrosshair(event.sender);
   }
 
   public onSeriesHover(e: SeriesHoverEvent) {
@@ -203,19 +277,6 @@ export class RoutePathsComponent implements OnInit {
         p.value.x === e.dataItem.time &&
         p.value.y === this.labelMap[e.dataItem.beltId]
     );
-  }
-
-  public isRowSelected = (e: RowArgs): boolean =>
-    this.mySelection.includes(this.chargeData.indexOf(e.dataItem));
-
-  public toggleChartHighlight(event: SeriesClickEvent): void {
-    if (this.chart) {
-      this.chart.showTooltip(
-        (point) =>
-          point.value.x === event.dataItem.time &&
-          point.value.y === event.dataItem.charge
-      );
-    }
   }
 
   public scrollToRow(index: number): void {
@@ -231,75 +292,124 @@ export class RoutePathsComponent implements OnInit {
     }
   }
 
-  getSeriesColor(seriesType: string): string {
-    switch (seriesType) {
-      case 'StoppingPoint':
-        return 'green';
-      case 'TransferText':
-        return 'red';
-      default:
-        return 'black';
+  public isRowSelected = (e: RowArgs): boolean =>
+    this.mySelection.includes(this.chargeData.indexOf(e.dataItem));
+
+  public toggleChartHighlight(event: SeriesClickEvent): void {
+    if (this.chart) {
+      this.chart.showTooltip(
+        (point) =>
+          point.value.x === event.dataItem.time &&
+          point.value.y === event.dataItem.charge
+      );
     }
   }
 
-  getSeriesWidth(seriesType: string): number {
-    switch (seriesType) {
-      case 'StoppingPoint':
-        return 2.5;
-      case 'TransferText':
-        return 4;
-      default:
-        return 1;
+  private crosshairValue = null;
+  private crosshairVisual: Group = new Group();
+  
+  private renderCrosshair(chart: ChartComponent) {
+    this.crosshairVisual.clear();
+    if (!this.crosshairValue) return;
+  
+    const { x, y } = this.crosshairValue;
+  
+    // Get axes
+    const xAxis = chart.findAxisByName('xAxis');
+    const yAxis = chart.findAxisByName('yAxis');
+    if (!xAxis || !yAxis) return;
+  
+    // --- Vertical Crosshair (unchanged) ---
+    const xSlot = xAxis.slot(x) as geometry.Rect;
+    const yRange = yAxis.range();
+    const yFullSlot = yAxis.slot(yRange.min, yRange.max) as any;
+    const yBbox = yFullSlot.bbox();
+  
+    const verticalLine = new Path({
+      stroke: { color: 'red', width: 2 },
+    }).moveTo(xSlot.center().x, yBbox.origin.y)
+      .lineTo(xSlot.center().x, yBbox.bottomRight().y);
+  
+    this.crosshairVisual.append(verticalLine);
+  
+    // --- Find and Connect Adjacent Points ---
+    const currentSeries = this.transformedData.find(
+      series => series.stats.some(point => 
+        point.time === x && point.charge === y
+      )
+    );
+  
+    if (currentSeries) {
+
+      
+      const points = currentSeries.stats;
+      const currentIndex = points.findIndex(p => p.time === x && p.charge === y);
+
+      console.log(points, currentIndex);
+      
+  
+      // Connect to previous point
+      if (currentIndex > 0) {
+        const prevPoint = points[currentIndex - 1];
+        this.drawConnectionLine(
+          xAxis, yAxis, 
+          prevPoint.time, prevPoint.charge, 
+          x, y,
+          'red', 2.5
+        );
+      }
+  
+      // Connect to next point
+      if (currentIndex < points.length - 1) {
+        const nextPoint = points[currentIndex + 1];
+        this.drawConnectionLine(
+          xAxis, yAxis,
+          x, y,
+          nextPoint.time, nextPoint.charge,
+          'red', 2.5
+        );
+      }
+
+      if(currentIndex){
+        const currentPoint = points[currentIndex];
+        this.drawConnectionLine(
+          xAxis, yAxis,
+          x, y-5,
+          0, currentPoint.charge-5,
+          'red', 2.5
+
+        );
+     
+      }
     }
+  
+    chart.findPaneByIndex(0).visual.insert(0, this.crosshairVisual);
+  }
+  
+  // Helper method to draw connection lines
+  private drawConnectionLine(
+    xAxis: any, 
+    yAxis: any,
+    x1: number, y1: number,
+    x2: number, y2: number,
+    color: string, 
+    width: number
+  ) {
+    const startX = xAxis.slot(x1).center().x;
+    const startY = yAxis.slot(y1-2).center().y;
+    const endX = xAxis.slot(x2).center().x;
+    const endY = yAxis.slot(y2-2).center().y;
+  
+    const line = new Path({
+      stroke: { color, width },
+    }).moveTo(startX, startY)
+      .lineTo(endX, endY);
+  
+    this.crosshairVisual.append(line);
+  }
+  public onRender(args: RenderEvent): void {
+    this.renderCrosshair(args.sender);
   }
 
-  private zoomStep: number = 10;
-
-  OnZoom(event: ZoomEvent) {}
-
-  public valueAxis = {
-    name: 'value',
-    labels: {
-      format: '#.00',
-    },
-  };
-
-  public categoryAxis = {
-    name: 'category',
-    maxDivisions: 10,
-  };
-  resetZoom() {
-    const min = -this.valueAxis;
-    const max = this.valueAxis;
-    this.categoryAxis = Object.assign({}, this.categoryAxis, {
-      min,
-      max,
-    });
-  }
-
-  @ViewChild('gridmenu')
-  public ChartContextMenu: ContextMenuComponent;
-  private contextItem: any;
-  public items: any[] = [];
-
-  getContextMenuItems(pointType: string): any[] {
-    switch (pointType) {
-      case 'StoppingPoint':
-        return [
-          { text: 'Call up', action: () => this.handleMenuAction('call up') },
-        ];
-      case 'AudioAnnouncement':
-        return [{ text: 'Play', action: () => this.handleMenuAction('Play') }];
-      default:
-        return [
-          { text: 'Option1', action: () => this.handleMenuAction('Option1') },
-          { text: 'Option2', action: () => this.handleMenuAction('option2') },
-        ];
-    }
-  }
-
-  handleMenuAction(action: string) {
-    console.log(`Action: ${action}, Data:`, this.contextItem);
-    alert(`${action} selected for ${this.contextItem.beltId}`);
-  }
+ 
 }
