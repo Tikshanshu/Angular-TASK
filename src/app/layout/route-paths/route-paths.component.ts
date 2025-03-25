@@ -185,21 +185,31 @@ export class RoutePathsComponent implements OnInit {
   };
 
   public cellClickHandler(event: CellClickEvent): void {
-    const y = event.dataItem.patternsequencegraphinfo?.BeltIdentifier;
+    const beltId = event.dataItem.patternsequencegraphinfo?.BeltIdentifier;
     const x = event.dataItem.DistanceFromStart;
     const dnp = event.dataItem.DistanceToNextSeqPoint;
     const dpp = event.dataItem.DistanceFromPrevSeqPoint;
 
+    console.log(event.dataItem);
+    
+
     this.onSeriesClick({
       dataItem: {
-        beltId: y,
+        beltId: beltId,
+        distanceFromStart: x,
         time: x,
         distancefromprevseqpoint: dpp,
         distancetonextseqpoint: dnp,
-        charge: y,
+        charge: this.labelMap[beltId],
       },
+     
+      originalEvent: event.originalEvent,
+  
     } as SeriesClickEvent);
+
+    
   }
+  
 
   public onSeriesClick(event: SeriesClickEvent) {
     const y = event.dataItem.beltId;
@@ -232,7 +242,7 @@ export class RoutePathsComponent implements OnInit {
         false,
         (p) =>
           p.value.x === event.dataItem.time &&
-          p.value.y === this.labelMap[event.dataItem.beltId]
+          p.value.y === event.dataItem.charge
       );
       this.chart.hideTooltip();
     } else {
@@ -241,17 +251,17 @@ export class RoutePathsComponent implements OnInit {
         true,
         (p) =>
           p.value.x === event.dataItem.time &&
-          p.value.y === this.labelMap[event.dataItem.beltId]
+          p.value.y === event.dataItem.charge
       );
       this.chart.showTooltip(
         (point) =>
           point.value.x === event.dataItem.time &&
-          point.value.y === this.labelMap[event.dataItem.beltId]
+          point.value.y === event.dataItem.charge
       );
     }
-    console.log(event);
+    
 
-    if (event.originalEvent.type === 'contextmenu') {
+    if (event.originalEvent?.type === 'contextmenu') {
       event.originalEvent.preventDefault();
 
       this.contextItem = event.dataItem;
@@ -324,7 +334,8 @@ export class RoutePathsComponent implements OnInit {
     const yRange = yAxis.range();
     const yFullSlot = yAxis.slot(yRange.min, yRange.max) as any;
     const yBbox = yFullSlot.bbox();
-  
+
+
     const verticalLine = new Path({
       stroke: { color: 'red', width: 2 },
     }).moveTo(xSlot.center().x, yBbox.origin.y)
@@ -332,56 +343,7 @@ export class RoutePathsComponent implements OnInit {
   
     this.crosshairVisual.append(verticalLine);
   
-    // --- Find and Connect Adjacent Points ---
-    const currentSeries = this.transformedData.find(
-      series => series.stats.some(point => 
-        point.time === x && point.charge === y
-      )
-    );
-  
-    if (currentSeries) {
-
-      
-      const points = currentSeries.stats;
-      const currentIndex = points.findIndex(p => p.time === x && p.charge === y);
-
-      console.log(points, currentIndex);
-      
-  
-      // Connect to previous point
-      if (currentIndex > 0) {
-        const prevPoint = points[currentIndex - 1];
-        this.drawConnectionLine(
-          xAxis, yAxis, 
-          prevPoint.time, prevPoint.charge, 
-          x, y,
-          'red', 2.5
-        );
-      }
-  
-      // Connect to next point
-      if (currentIndex < points.length - 1) {
-        const nextPoint = points[currentIndex + 1];
-        this.drawConnectionLine(
-          xAxis, yAxis,
-          x, y,
-          nextPoint.time, nextPoint.charge,
-          'red', 2.5
-        );
-      }
-
-      if(currentIndex){
-        const currentPoint = points[currentIndex];
-        this.drawConnectionLine(
-          xAxis, yAxis,
-          x, y-5,
-          0, currentPoint.charge-5,
-          'red', 2.5
-
-        );
-     
-      }
-    }
+   
   
     chart.findPaneByIndex(0).visual.insert(0, this.crosshairVisual);
   }
@@ -396,20 +358,63 @@ export class RoutePathsComponent implements OnInit {
     width: number
   ) {
     const startX = xAxis.slot(x1).center().x;
-    const startY = yAxis.slot(y1-2).center().y;
+    const startY = yAxis.slot(y1-6).center().y;
     const endX = xAxis.slot(x2).center().x;
-    const endY = yAxis.slot(y2-2).center().y;
+    const endY = yAxis.slot(y2-6).center().y;
   
+    // Draw the line itself
     const line = new Path({
       stroke: { color, width },
     }).moveTo(startX, startY)
       .lineTo(endX, endY);
   
     this.crosshairVisual.append(line);
+  
+    // Create X markers
+    const createXMarker = (x: number, y: number) => {
+      const size = 6;
+      const halfSize = size / 2;
+      
+      // Create the X shape using two lines
+      const xMarker = new Group();
+      
+      // First diagonal line of the X
+      const line1 = new Path({
+        stroke: { color, width: width * .5 } 
+      }).moveTo(x - halfSize, y - halfSize)
+        .lineTo(x + halfSize, y + halfSize);
+      
+      // Second diagonal line of the X
+      const line2 = new Path({
+        stroke: { color, width: width * .5 }
+      }).moveTo(x + halfSize, y - halfSize)
+        .lineTo(x - halfSize, y + halfSize);
+      
+      xMarker.append(line1);
+      xMarker.append(line2);
+      
+      return xMarker;
+    };
+  
+   
+    this.crosshairVisual.append(createXMarker(startX, startY));
+    this.crosshairVisual.append(createXMarker(endX, endY));
   }
+
+  
   public onRender(args: RenderEvent): void {
     this.renderCrosshair(args.sender);
   }
+  
+  
+  // Handle the zoom event
+  public onZoom(event: ZoomEvent): void {
+    // Re-render the crosshair and connection lines after zooming
+    console.log(event);
+    
+    this.renderCrosshair(event.sender);
+  }
+  
 
  
 }

@@ -5,7 +5,7 @@
       class="foo"
       [data]="chargeData"
       [scrollable]="'virtual'"
-      [rowHeight]="16"
+      [rowHeight]="36"
       [height]="195"
       [resizable]="true"
       (cellClick)="cellClickHandler($event)"
@@ -83,6 +83,7 @@
   </div>
 
   <div class="charts" id="chartContainer"  style="overflow-x: auto" >
+
     <kendo-chart
     style="height: 290px; "
    
@@ -95,6 +96,7 @@
       [categoryAxis]="categoryAxis"
       [valueAxis]="valueAxis"
       (render)="onRender($event)"
+      (zoom)="onZoom($event)" 
   
     >
       <kendo-chart-legend position="bottom"></kendo-chart-legend>
@@ -154,8 +156,8 @@
           name="xAxis"
           type="numeric"
           [min]="-200"
-          [max]="1000"
-          
+          [max]="800"
+
           [majorTicks]="majorTicks"
           [majorUnit]="50"
           [labels]="{  step: 1, format: '0' }"

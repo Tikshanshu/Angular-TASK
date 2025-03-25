@@ -15,8 +15,9 @@ export function markerVisual(args: any): Element {
   const iconPosition = new Point(args.rect.origin.x, args.rect.origin.y);
   const rect = new Rect(iconPosition, args.rect.size);
   const layout = new Layout(rect, {
-    orientation: "vertical",
+    orientation: "horizontal",
     alignItems: "center",
+    alignContent: 'center',
     justifyContent: "center",
   });
 
