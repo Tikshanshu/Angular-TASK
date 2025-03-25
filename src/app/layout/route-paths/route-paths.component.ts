@@ -343,7 +343,56 @@ export class RoutePathsComponent implements OnInit {
   
     this.crosshairVisual.append(verticalLine);
   
-   
+    // --- Find and Connect Adjacent Points ---
+    const currentSeries = this.transformedData.find(
+      series => series.stats.some(point => 
+        point.time === x && point.charge === y
+      )
+    );
+  
+    if (currentSeries) {
+
+      
+      const points = currentSeries.stats;
+      const currentIndex = points.findIndex(p => p.time === x && p.charge === y);
+
+    
+      
+  
+      // Connect to previous point
+      if (currentIndex > 0) {
+        const prevPoint = points[currentIndex - 1];
+        this.drawConnectionLine(
+          xAxis, yAxis, 
+          prevPoint.time, prevPoint.charge, 
+          x, y,
+          'red', 2.5
+        );
+      }
+  
+      // Connect to next point
+      if (currentIndex < points.length - 1) {
+        const nextPoint = points[currentIndex + 1];
+        this.drawConnectionLine(
+          xAxis, yAxis,
+          x, y,
+          nextPoint.time, nextPoint.charge,
+          'red', 2.5
+        );
+      }
+
+      if(currentIndex){
+        const currentPoint = points[currentIndex];
+        this.drawConnectionLine(
+          xAxis, yAxis,
+          x, y-5,
+          0, currentPoint.charge-5,
+          'red', 2.5
+
+        );
+     
+      }
+    }
   
     chart.findPaneByIndex(0).visual.insert(0, this.crosshairVisual);
   }
@@ -405,7 +454,6 @@ export class RoutePathsComponent implements OnInit {
   public onRender(args: RenderEvent): void {
     this.renderCrosshair(args.sender);
   }
-  
   
   // Handle the zoom event
   public onZoom(event: ZoomEvent): void {
