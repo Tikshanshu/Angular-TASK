@@ -22,7 +22,7 @@
 }
 
 .sidebar.collapsed {
-  width: 12%; 
+  width: 15%; 
   overflow: hidden;
   margin-left: 5px;
   height: 40px; 
@@ -107,7 +107,7 @@
 
 
 .sidebar.collapsed + .main-content {
-  margin-left: 10%; 
+  margin-left: 12%; 
 }
 
 @media (max-width: 768px) {
