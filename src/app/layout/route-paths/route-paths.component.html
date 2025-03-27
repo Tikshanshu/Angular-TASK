@@ -82,12 +82,14 @@
     </kendo-grid>
   </div>
 
-  <div class="charts" id="chartContainer"  style="overflow-x: auto" >
+  <div class="cam-chart">
+  <div class="charts" id="chartContainer"  >
 
     <kendo-chart
-    style="height: 290px; "
+    style="height: 290px;min-width: 5000px;padding: 10px; "
    
       #chart
+      class="scrollable-chart"
       [zoomable]="{ mousewheel: { lock: 'y',rate: zoomrate }, selection: { lock: 'y' }  }"
     
       [pannable]="{ lock: 'y' }"
@@ -100,8 +102,7 @@
   
     >
       <kendo-chart-legend position="bottom"></kendo-chart-legend>
-
-      <kendo-chart-series>
+        <kendo-chart-series>
         <ng-container *ngFor="let dataGroup of transformedData let i = index">
           <kendo-chart-series-item
         
@@ -156,10 +157,9 @@
           name="xAxis"
           type="numeric"
           [min]="-200"
-          [max]="800"
-
+          [max]="50000"
           [majorTicks]="majorTicks"
-          [majorUnit]="50"
+          [majorUnit]="5000"
           [labels]="{  step: 1, format: '0' }"
           [color]="'black'"
           [crosshair]="{
@@ -196,18 +196,41 @@
 
     </kendo-chart>
 
-    <!-- Toolbar -->
-    <div class="chart-toolbar">
-      <button (click)="resetZoom()">Reset Zoom</button>
-      <button >Button 1</button>
-      <button >Button 2</button>
-    </div>
+    
     
     <kendo-contextmenu #gridmenu [items]="items">
       <ng-template kendoMenuItemTemplate let-item="item">
           {{ item.text }}
       </ng-template>
   </kendo-contextmenu>
+  </div>
+  <!-- Toolbar -->
+  <div class="chart-toolbar">
+
+      <button
+      kendoButton
+       class="k-button k-button-sm"
+        (click)="resetZoom()"
+        title="Reset Zoom"
+        size="medium"
+        [svgIcon]="searchSVG"
+        fillMode="outline"
+      ></button>
+      <button
+      kendoButton
+       class="k-button k-button-sm"
+       [svgIcon]="gearSVG"
+      >Setting</button>
+      <button
+      kendoButton
+       class="k-button k-button-sm"
+       
+        fillMode="outline"
+      >Overview</button>
+    
+
+  </div>
+
   </div>
   
 </div>

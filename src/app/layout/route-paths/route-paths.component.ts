@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { IconsModule } from '@progress/kendo-angular-icons';
 import Sdata from '../camera/response_1741707098235.json';
 import {
@@ -27,6 +27,8 @@ import {
   KENDO_CONTEXTMENU,
 } from '@progress/kendo-angular-menu';
 import { ContextMenuModule } from '@progress/kendo-angular-menu';
+import { KENDO_BUTTONS } from "@progress/kendo-angular-buttons";
+import { gearIcon, searchIcon, SVGIcon} from "@progress/kendo-svg-icons";
 
 import {
   getSeriesColor,
@@ -36,11 +38,12 @@ import {
   resetZoom,
 
 } from './helper';
-import { geometry, Group, Path } from '@progress/kendo-drawing';
+import { geometry, Group, Path, Text } from '@progress/kendo-drawing';
 
 @Component({
   selector: 'app-route-paths',
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [
     ChartsModule,
     CommonModule,
@@ -48,6 +51,7 @@ import { geometry, Group, Path } from '@progress/kendo-drawing';
     GridModule,
     PopupModule,
     ContextMenuModule,
+    KENDO_BUTTONS
   ],
   templateUrl: './route-paths.component.html',
   styleUrl: './route-paths.component.scss',
@@ -70,10 +74,7 @@ export class RoutePathsComponent implements OnInit {
   public markerVisual = markerVisual;
   public minX = 0;
   public maxX = 0;
-  public majorGridLines = {
-    color: 'lightgray',
-    visible: true,
-  };
+  
   public majorTicks = {
     color: 'black',
     size: 15,
@@ -96,12 +97,14 @@ export class RoutePathsComponent implements OnInit {
 
   public categoryAxis = {
     name: 'category',
-    maxDivisions: 10,
+    maxDivisions: 1,
   };
 
   ngOnInit() {
     this.processData();
     this.transformData();
+    console.log(this.stoppingPointArray);
+    
     
     
   }
@@ -128,7 +131,12 @@ export class RoutePathsComponent implements OnInit {
     });
   }
 
+  public stoppingPointArray: number[] = [];
+
   transformData() {
+
+    this.stoppingPointArray = [];
+
     this.transformedData = this.beltIdentifiers.map((identifier) => ({
       current: identifier,
       stats: this.chargeData
@@ -142,6 +150,12 @@ export class RoutePathsComponent implements OnInit {
 
           this.minX = Math.min(this.minX, item.distancefromstart);
           this.maxX = Math.max(this.maxX, item.distancefromstart);
+
+          if (item.patternsequencegraphinfo?.BeltIdentifier === 'StoppingPoint') {
+            this.stoppingPointArray.push(item.distancefromstart);
+          }
+
+
 
           return {
             time: item.distancefromstart,
@@ -178,6 +192,7 @@ export class RoutePathsComponent implements OnInit {
           };
         }),
     }));
+    this.stoppingPointArray.sort((a, b) => a - b);
   }
 
   public labelTemplate = (args: any) => {
@@ -343,79 +358,102 @@ export class RoutePathsComponent implements OnInit {
   
     this.crosshairVisual.append(verticalLine);
   
-    // --- Find and Connect Adjacent Points ---
     const currentSeries = this.transformedData.find(
-      series => series.stats.some(point => 
-        point.time === x && point.charge === y
-      )
+      series => series.stats.some(point => point.time === x && point.charge === y)
     );
-  
+    
     if (currentSeries) {
-
-      
       const points = currentSeries.stats;
       const currentIndex = points.findIndex(p => p.time === x && p.charge === y);
-
+    
+      if (currentIndex !== -1) {
+        const currentPoint = points[currentIndex];
     
       
-  
-      // Connect to previous point
-      if (currentIndex > 0) {
-        const prevPoint = points[currentIndex - 1];
-        this.drawConnectionLine(
-          xAxis, yAxis, 
-          prevPoint.time, prevPoint.charge, 
-          x, y,
-          'red', 2.5
-        );
+        let lowerStoppingPoint = null;
+        let upperStoppingPoint = null;
+    
+        for (let i = 0; i < this.stoppingPointArray.length; i++) {
+          const stopPoint = this.stoppingPointArray[i];
+    
+          if (stopPoint < currentPoint.time) {
+            lowerStoppingPoint = stopPoint; 
+          } else if (stopPoint > currentPoint.time && !upperStoppingPoint) {
+            upperStoppingPoint = stopPoint; 
+          }
+        }
+    
+       
+        if (lowerStoppingPoint !== null) {
+          this.drawConnectionLine(
+            xAxis, yAxis,
+            lowerStoppingPoint, y,
+            currentPoint.time, y,
+            'red', 2.5,
+            currentPoint.time - lowerStoppingPoint
+          );
+        }
+    
+        if (upperStoppingPoint !== null) {
+          this.drawConnectionLine(
+            xAxis, yAxis,
+            currentPoint.time, y,
+            upperStoppingPoint, y,
+            'red', 2.5,
+            upperStoppingPoint - currentPoint.time
+          );
+        }
       }
-  
-      // Connect to next point
-      if (currentIndex < points.length - 1) {
-        const nextPoint = points[currentIndex + 1];
-        this.drawConnectionLine(
-          xAxis, yAxis,
-          x, y,
-          nextPoint.time, nextPoint.charge,
-          'red', 2.5
-        );
-      }
-
-      if(currentIndex){
-        const currentPoint = points[currentIndex];
-        this.drawConnectionLine(
-          xAxis, yAxis,
-          x, y-5,
-          0, currentPoint.charge-5,
-          'red', 2.5
-
-        );
+    
      
-      }
+      this.drawConnectionLine(
+        xAxis, yAxis,
+        x, y - 10,
+        0, y - 10,
+        'red', 2.5,
+        x
+      );
     }
-  
+    
     chart.findPaneByIndex(0).visual.insert(0, this.crosshairVisual);
-  }
-  
-  // Helper method to draw connection lines
+  }    
+
+
   private drawConnectionLine(
     xAxis: any, 
     yAxis: any,
     x1: number, y1: number,
     x2: number, y2: number,
     color: string, 
-    width: number
+    width: number,
+    x: number
+
   ) {
     const startX = xAxis.slot(x1).center().x;
-    const startY = yAxis.slot(y1-6).center().y;
+    const startY = yAxis.slot(y1-8).center().y;
     const endX = xAxis.slot(x2).center().x;
-    const endY = yAxis.slot(y2-6).center().y;
-  
-    // Draw the line itself
+    const endY = yAxis.slot(y2-8).center().y;
+
+      // Calculate the midpoint for the text label
+     const midX = (startX + endX) / 2;
+     const midY = (startY + endY) / 2;
+     // Add text label at the midpoint
+  const text = new Text(
+    x.toString(),
+    [midX, midY],
+    {
+      fill: { color: 'black' },
+      font: 'bold 12px Arial',
+    }
+  );
+     
+    
+
     const line = new Path({
       stroke: { color, width },
     }).moveTo(startX, startY)
       .lineTo(endX, endY);
+
   
     this.crosshairVisual.append(line);
   
@@ -448,21 +486,27 @@ export class RoutePathsComponent implements OnInit {
    
     this.crosshairVisual.append(createXMarker(startX, startY));
     this.crosshairVisual.append(createXMarker(endX, endY));
+    this.crosshairVisual.append(text);
   }
 
   
   public onRender(args: RenderEvent): void {
     this.renderCrosshair(args.sender);
   }
+
+
+
   
   // Handle the zoom event
   public onZoom(event: ZoomEvent): void {
     // Re-render the crosshair and connection lines after zooming
     console.log(event);
     
+    
     this.renderCrosshair(event.sender);
   }
   
-
+  public searchSVG: SVGIcon = searchIcon;
+  public gearSVG: SVGIcon = gearIcon;
  
 }
