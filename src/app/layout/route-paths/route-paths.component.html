@@ -83,6 +83,29 @@
   </div>
 
   <div class="cam-chart">
+    <div class="layer">
+       <ul>
+        <li>
+          <label>AudioAnnouncement</label>
+        </li>
+        <li>
+          <label >MfdSegment</label>
+        </li>
+        <li>
+          <label >DpiDestination</label>
+        </li>
+        <li>
+          <label >TariffZone</label>
+        </li>
+        <li>
+          <label >StoppingPoint</label>
+        </li>
+        <li>
+          <label >VehicleDestination</label>
+        </li>
+       </ul>
+
+    </div>
   <div class="charts" id="chartContainer"  >
 
     <kendo-chart
@@ -181,7 +204,7 @@
             tooltip: { visible: true, format: '{0}' },
             color: '#d75463',
           }"
-         
+         [visible]="false"
         
         >
           <kendo-chart-y-axis-item-labels
